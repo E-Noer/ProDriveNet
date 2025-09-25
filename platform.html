@@ -224,8 +224,8 @@ const API_BASE =
     ? ''  // same-origin in production
     : 'http://localhost:3001'; // dev
 
-async function fetchRDW(kenteken){
-  const plate = kenteken.trim().toUpperCase().replace(/-/g,'');
+async function getRdwData(kenteken){
+    const plate = kenteken.trim().toUpperCase().replace(/-/g,'');
   const r = await fetch(`${API_BASE}/api/rdw?kenteken=${encodeURIComponent(plate)}`);
   if (!r.ok) {
     let msg = `RDW ${r.status}`;
