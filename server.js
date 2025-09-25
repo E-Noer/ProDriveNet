@@ -5,37 +5,32 @@ import cors from 'cors';
 
 const app = express();
 
-// CORS: allow local dev tools; same-origin (prodrivenet.com) won’t hit CORS at all.
+// Allow typical local dev origins; production same-origin won’t hit CORS.
 const allowed = new Set([
-  'http://127.0.0.1:15500', // VSCode Live Server (your screenshot)
-  'http://127.0.0.1:5500',
-  'http://localhost:15500',
-  'http://localhost:5500',
-  'http://localhost:3001',
-  'http://127.0.0.1:3001',
-  'https://prodrivenet.com',
-  'https://www.prodrivenet.com'
+  'http://127.0.0.1:3001','http://localhost:3001',
+  'http://127.0.0.1:5500','http://localhost:5500',
+  'http://127.0.0.1:15500','http://localhost:15500',
+  'https://prodrivenet.com','https://www.prodrivenet.com'
 ]);
 app.use(cors({
   origin: (origin, cb) => (!origin ? cb(null, true) : cb(null, allowed.has(origin))),
-  credentials: false
 }));
 
 app.use(express.json({ limit: '12mb' }));
 
-// Static (serve index.html, platform.html, etc.)
+// Serve static files (index.html, platform.html, etc.)
 const __dirname = path.resolve();
 app.use(express.static(__dirname, { extensions: ['html'], cacheControl: false }));
 
-const parseDate = (s) => (s && s.length === 8) ? `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}` : null;
+const parseDate = s => (s && s.length === 8) ? `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}` : null;
 
 app.get('/api/rdw', async (req, res) => {
-  const plate = String(req.query.kenteken || '').replace(/-/g,'').toUpperCase();
-  if (!plate) return res.status(400).json({ error: 'kenteken ontbreekt' });
+  let plate = String(req.query.kenteken || '').toUpperCase().replace(/-/g,'');
+  if (!/^[A-Z0-9]{1,8}$/.test(plate)) return res.status(400).json({ error: 'Ongeldig kentekenformaat' });
 
   const headers = {};
   if (process.env.RDW_APP_TOKEN) headers['X-App-Token'] = process.env.RDW_APP_TOKEN;
-  if (process.env.RDW_APP_SECRET) headers['X-App-Secret'] = process.env.RDW_APP_SECRET;
+  // IMPORTANT: do NOT send X-App-Secret to Socrata/RDW
 
   const q = async (url) => {
     const r = await fetch(url, { headers });
@@ -48,12 +43,7 @@ app.get('/api/rdw', async (req, res) => {
 
   try {
     const [
-      basisArr,
-      brandstofArr,
-      kleurArr,
-      carrosserieArr,
-      carroSpecArr,
-      asArr
+      basisArr, brandstofArr, kleurArr, carrosserieArr, carroSpecArr, asArr
     ] = await Promise.all([
       q(`https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=${plate}`),
       q(`https://opendata.rdw.nl/resource/8ys7-d773.json?kenteken=${plate}`),
@@ -144,7 +134,6 @@ app.get('/api/rdw', async (req, res) => {
         type: basis.type || null,
         variant: basis.variant || null,
         uitvoering: basis.uitvoering || null,
-        typegoedkeuringsnummer: basis.typegoedkeuringsnummer || null,
         datum_eerste_toelating: parseDate(basis.datum_eerste_toelating),
         datum_tenaamstelling: parseDate(basis.datum_tenaamstelling),
         datum_eerste_tenaamstelling_in_nederland: parseDate(basis.datum_eerste_tenaamstelling_in_nederland),
@@ -162,14 +151,10 @@ app.get('/api/rdw', async (req, res) => {
       assen: assen
     };
 
-    res.json({
-      summary,
-      details,
-      _raw: {
-        basis: basisArr, brandstof: brandstofArr, kleur: kleurArr,
-        carrosserie: carrosserieArr, carrosserie_specifiek: carroSpecArr, assen: asArr
-      }
-    });
+    res.json({ summary, details, _raw:{
+      basis: basisArr, brandstof: brandstofArr, kleur: kleurArr,
+      carrosserie: carrosserieArr, carrosserie_specifiek: carroSpecArr, assen: asArr
+    }});
   } catch (e) {
     console.error('[RDW] error', e);
     res.status(500).json({ error: 'RDW service fout', detail: String(e?.message || e) });
@@ -177,6 +162,4 @@ app.get('/api/rdw', async (req, res) => {
 });
 
 const PORT = Number(process.env.PORT || 3001);
-app.listen(PORT, () => {
-  console.log(`Server online on http://localhost:${PORT} (proxied by Nginx for https://prodrivenet.com)`);
-});
+app.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`));
