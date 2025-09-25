@@ -2,54 +2,39 @@ name: Deploy ProDriveNet
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Make sure the SSH user can write to the target folder
-      - name: Prepare target dir on VPS
+      - name: SSH Deploy
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DEPLOY_PAT: ${{ secrets.DEPLOY_PAT }}   # <-- make sure this exists
         with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host:     ${{ secrets.SSH_HOST }}       # 185.103.240.31
+          port:     ${{ secrets.SSH_PORT }}       # usually 22
+          username: ${{ secrets.SSH_USER }}       # root
+          key:      ${{ secrets.SSH_PRIVATE_KEY }}# your OpenSSH private key
+          envs:     DEPLOY_PAT                    # forward it into the shell
           script: |
-            set -euxo pipefail
-            sudo mkdir -p /var/www/prodrivenet.com
-            # give current SSH user write access for upload
-            sudo chown -R "$USER":"$USER" /var/www/prodrivenet.com
+            set -euo pipefail
 
-      - name: Upload site via SCP
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "."
-          target: "/var/www/prodrivenet.com"
-          overwrite: true
-          strip_components: 0
-          # no `exclude` and no `rm` (not supported / caused the error)
+            FRONTEND_DIR=/var/www/prodrivenet.com/html
+            FE_URL="https://${DEPLOY_PAT}@github.com/E-Noer/ProDriveNet.git"
 
-      - name: Finalize and reload nginx
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -euxo pipefail
-            sudo chown -R www-data:www-data /var/www/prodrivenet.com
-            sudo find /var/www/prodrivenet.com -type d -exec chmod 755 {} \;
-            sudo find /var/www/prodrivenet.com -type f -exec chmod 644 {} \;
-            sudo nginx -t
-            sudo systemctl reload nginx
+            mkdir -p "$FRONTEND_DIR"
+            git config --global --add safe.directory "$FRONTEND_DIR"
+
+            if [ ! -d "$FRONTEND_DIR/.git" ]; then
+              git clone --depth 1 "$FE_URL" "$FRONTEND_DIR"
+            else
+              git -C "$FRONTEND_DIR" remote set-url origin "$FE_URL"
+              git -C "$FRONTEND_DIR" fetch --all
+              git -C "$FRONTEND_DIR" reset --hard origin/main
+            fi
+
+            nginx -t
+            systemctl reload nginx
