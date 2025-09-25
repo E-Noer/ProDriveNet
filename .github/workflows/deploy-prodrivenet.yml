@@ -1,16 +1,36 @@
-name: SSH test
-on: [workflow_dispatch]
+name: Deploy ProDriveNet
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            whoami
-            hostname
+            set -euo pipefail
+            FRONTEND_DIR=/var/www/prodrivenet.com/html
+
+            # Make sure folder exists
+            mkdir -p "$FRONTEND_DIR"
+            git config --global --add safe.directory "$FRONTEND_DIR"
+
+            # Clone or pull latest
+            if [ ! -d "$FRONTEND_DIR/.git" ]; then
+              git clone --depth 1 https://github.com/E-Noer/ProDriveNet.git "$FRONTEND_DIR"
+            else
+              git -C "$FRONTEND_DIR" fetch --all
+              git -C "$FRONTEND_DIR" reset --hard origin/main
+            fi
+
+            nginx -t
+            systemctl reload nginx
