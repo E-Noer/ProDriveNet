@@ -1,0 +1,38 @@
+name: Deploy ProDriveNet
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -ex
+            FRONTEND_DIR=/var/www/prodrivenet.com
+            mkdir -p "$FRONTEND_DIR"
+            git config --global --add safe.directory "$FRONTEND_DIR"
+
+            if [ ! -d "$FRONTEND_DIR/.git" ]; then
+              git clone --depth 1 git@github.com:E-Noer/ProDriveNet.git "$FRONTEND_DIR"
+            else
+              cd "$FRONTEND_DIR" \
+                && git fetch --all \
+                && git reset --hard origin/main
+            fi
+
+            chown -R www-data:www-data "$FRONTEND_DIR"
+            find "$FRONTEND_DIR" -type d -exec chmod 755 {} \;
+            find "$FRONTEND_DIR" -type f -exec chmod 644 {} \;
+
+            nginx -t
+            systemctl reload nginx
