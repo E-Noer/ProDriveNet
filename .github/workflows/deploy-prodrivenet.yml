@@ -2,41 +2,45 @@ name: Deploy ProDriveNet
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH Deploy
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload site via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "."
+          target: "/var/www/prodrivenet.com"
+          rm: true
+          overwrite: true
+          strip_components: 0
+          exclude: |
+            .git
+            .github/**
+            README.md
+
+      - name: Finalize on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: DEPLOY_PAT
           script: |
-            set -ex
-            FRONTEND_DIR=/var/www/prodrivenet.com
-            mkdir -p "$FRONTEND_DIR"
-            git config --global --add safe.directory "$FRONTEND_DIR"
-
-            FE_URL="https://${DEPLOY_PAT}@github.com/E-Noer/ProDriveNet.git"
-
-            if [ ! -d "$FRONTEND_DIR/.git" ]; then
-              git clone --depth 1 "$FE_URL" "$FRONTEND_DIR"
-            else
-              cd "$FRONTEND_DIR" \
-                && git remote set-url origin "$FE_URL" \
-                && git fetch --all \
-                && git reset --hard origin/main
-            fi
-
-          
-
-            
-
-            nginx -t
-            systemctl reload nginx
+            set -euxo pipefail
+            sudo mkdir -p /var/www/prodrivenet.com
+            sudo chown -R www-data:www-data /var/www/prodrivenet.com
+            sudo find /var/www/prodrivenet.com -type d -exec chmod 755 {} \;
+            sudo find /var/www/prodrivenet.com -type f -exec chmod 644 {} \;
+            sudo nginx -t
+            sudo systemctl reload nginx
