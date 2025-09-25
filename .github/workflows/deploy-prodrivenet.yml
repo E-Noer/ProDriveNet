@@ -12,24 +12,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload site via SSH
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "."
-          target: "/var/www/prodrivenet.com"
-          rm: true
-          overwrite: true
-          strip_components: 0
-          exclude: |
-            .git
-            .github/**
-            README.md
-
-      - name: Finalize on server
+      # Make sure the SSH user can write to the target folder
+      - name: Prepare target dir on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -39,6 +23,31 @@ jobs:
           script: |
             set -euxo pipefail
             sudo mkdir -p /var/www/prodrivenet.com
+            # give current SSH user write access for upload
+            sudo chown -R "$USER":"$USER" /var/www/prodrivenet.com
+
+      - name: Upload site via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "."
+          target: "/var/www/prodrivenet.com"
+          overwrite: true
+          strip_components: 0
+          # no `exclude` and no `rm` (not supported / caused the error)
+
+      - name: Finalize and reload nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euxo pipefail
             sudo chown -R www-data:www-data /var/www/prodrivenet.com
             sudo find /var/www/prodrivenet.com -type d -exec chmod 755 {} \;
             sudo find /var/www/prodrivenet.com -type f -exec chmod 644 {} \;
