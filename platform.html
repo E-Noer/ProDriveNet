@@ -218,21 +218,24 @@
       // ========= IMPORTANT =========
       // On production (prodrivenet.com) we use SAME-ORIGIN: ''.
       // In local dev (file server / VSCode Live Server) we fall back to http://localhost:3001.
-      const API_BASE =
-        (location.hostname.endsWith('prodrivenet.com') || location.hostname === 'www.prodrivenet.com')
-          ? ''
-          : 'http://localhost:3001';
+ <!-- only the important bits shown here; paste the whole file you have, and ensure these lines exist -->
 
-      const $  = (q,root=document)=>root.querySelector(q);
-      const $$ = (q,root=document)=>[...root.querySelectorAll(q)];
-      const toast = (msg, kind='info')=>{
-        const el = $('#toast');
-        el.textContent = msg;
-        el.classList.remove('hidden');
-        el.style.borderColor = kind==='error' ? 'var(--danger)' : kind==='ok' ? 'var(--success)' : '#e5e7eb';
-        el.style.color = kind==='error' ? 'var(--danger)' : 'inherit';
-        setTimeout(()=>el.classList.add('hidden'), 2800);
-      };
+<!-- Inside <script type="module"> at the bottom -->
+const API_BASE =
+  (location.hostname === 'prodrivenet.com' || location.hostname === 'www.prodrivenet.com')
+    ? ''  // same-origin in production
+    : 'http://localhost:3001'; // dev
+
+async function fetchRDW(kenteken){
+  const plate = kenteken.trim().toUpperCase().replace(/-/g,'');
+  const r = await fetch(`${API_BASE}/api/rdw?kenteken=${encodeURIComponent(plate)}`);
+  if (!r.ok) {
+    let msg = `RDW ${r.status}`;
+    try { const j = await r.json(); msg = j.detail || j.error || msg; } catch {}
+    throw new Error(msg);
+  }
+  return r.json();
+}
 
       // ---- RDW proxy + normalizer
       async function fetchRDW(kenteken){
