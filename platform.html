@@ -5,45 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>E-Noer Auto Platform</title>
 
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer"/>
 
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Theme tokens -->
     <style>
       :root{
         --bg:#f5f6f8; --panel:#ffffff; --muted:#6b7280; --ink:#0f172a;
-        --brand:#ff5a1f; --success:#16a34a; --danger:#ef4444;
+        --brand:#ff5a1f; --brand-2:#1f8fff; --success:#16a34a;
+        --warning:#f59e0b; --danger:#ef4444; --ring: 0 0 0 3px rgba(31,143,255,.2);
       }
+      .scroll-slim::-webkit-scrollbar{height:8px;width:8px}
+      .scroll-slim::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:999px}
+      .badge{display:inline-flex;align-items:center;gap:.4rem;padding:.30rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700}
+      .badge-live{color:#fff;background:#111;border:1px solid transparent;box-shadow:0 0 0 2px #ff00e6 inset,0 0 0 4px #00ffff inset}
+      .tab-btn{padding:.55rem .8rem;border-bottom:2px solid transparent}
+      .tab-btn[aria-selected="true"]{border-color:var(--brand);color:#0f172a;font-weight:700}
+      .pill{border:1px solid #e5e7eb;border-radius:999px;padding:.35rem .6rem;font-size:.8rem}
+      .ring-focus:focus{outline:none;box-shadow:var(--ring)}
+      .dropzone{border:2px dashed #d1d5db;border-radius:.75rem;min-height:180px;background:repeating-linear-gradient(45deg,#fafafa,#fafafa 10px,#f7f7f7 10px,#f7f7f7 20px)}
+      .sticker{position:absolute;top:1rem;left:1rem;transform:rotate(-20deg);background:#22c55e;color:#fff;font-weight:800;letter-spacing:.03em;padding:.35rem .75rem;border-radius:.25rem;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+      .sticker.rb{left:auto;right:1rem;transform:rotate(20deg)}
       .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.6rem;padding:.55rem .85rem;border:1px solid #e5e7eb;background:#fff}
       .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+      .btn-ghost{background:#fff}
       .btn-icon{width:2.25rem;height:2.25rem;justify-content:center;padding:0}
       .kv{display:grid;grid-template-columns:140px 1fr;gap:.35rem .75rem;font-size:.9rem}
+      .tag{display:inline-flex;align-items:center;gap:.35rem;background:#f1f5f9;border:1px solid #e5e7eb;border-radius:.55rem;padding:.25rem .55rem;font-size:.78rem}
+      .table-like{display:grid;grid-template-columns:52px 1.1fr auto auto;gap:.5rem;align-items:center}
+      .table-head{color:var(--muted);font-size:.78rem}
       .veh-row{background:var(--panel);border:1px solid #e5e7eb;border-radius:.75rem;padding:.65rem .75rem}
-      pre.json{max-height:320px;overflow:auto;background:#0b1220;color:#dff1ff;padding:1rem;border-radius:.5rem;font-size:12px}
+      pre.json {max-height:320px;overflow:auto;background:#0b1220;color:#dff1ff;padding:1rem;border-radius:.5rem;font-size:12px}
     </style>
   </head>
 
   <body class="min-h-screen bg-[var(--bg)] text-[var(--ink)]">
     <div class="flex min-h-screen">
+      <!-- SIDEBAR -->
       <aside class="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col">
         <div class="h-14 flex items-center gap-2 px-4 border-b">
           <i class="fa-solid fa-circle text-[var(--brand)]"></i>
           <span class="font-extrabold tracking-tight">E-Noer Auto</span>
         </div>
-        <nav class="flex-1 overflow-auto py-3">
+        <nav class="flex-1 overflow-auto scroll-slim py-3">
           <div class="px-3 text-xs uppercase text-gray-500 mb-2">Menu</div>
           <ul class="space-y-1 px-2">
             <li><a class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50" href="#"><i class="fa-solid fa-gauge"></i>Dashboard</a></li>
             <li class="px-3 py-1 text-xs uppercase text-gray-400">RDW-diensten</li>
             <li><a class="flex items-center gap-3 px-3 py-2 rounded-md bg-gray-100 font-semibold" href="#"><i class="fa-solid fa-car-side"></i>Voertuigen</a></li>
+            <li><a class="ml-9 flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50" href="#"><i class="fa-solid fa-car"></i>Auto’s</a></li>
+            <li><a class="ml-9 flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50" href="#"><i class="fa-solid fa-motorcycle"></i>Motoren</a></li>
+            <li><a class="ml-9 flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50" href="#"><i class="fa-solid fa-truck"></i>Vrachtwagens</a></li>
+            <li class="px-3 py-1 text-xs uppercase text-gray-400">Beheer</li>
+            <li><a class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50" href="#"><i class="fa-solid fa-screwdriver-wrench"></i>Tools</a></li>
+            <li><a class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50" href="#"><i class="fa-solid fa-gear"></i>Instellingen</a></li>
           </ul>
         </nav>
-        <div class="p-3 border-t"><div class="text-xs text-gray-500">Status</div><div class="mt-1 text-xs text-gray-500">LIVE / API</div></div>
+        <div class="p-3 border-t">
+          <div class="text-xs text-gray-500">Status</div>
+          <div class="mt-1 flex items-center gap-2">
+            <span class="badge badge-live">LIVE</span>
+            <span class="text-xs text-gray-500">/ API</span>
+          </div>
+        </div>
       </aside>
 
+      <!-- MAIN -->
       <main class="flex-1">
+        <!-- TOPBAR -->
         <header class="h-14 bg-white border-b flex items-center justify-between px-4">
-          <div class="font-semibold">E-Noer — RDW voertuigopvraag</div>
-          <a href="/" class="btn"><i class="fa-solid fa-house"></i> Home</a>
+          <div class="flex items-center gap-3">
+            <button class="btn btn-icon lg:hidden" id="openSidebar"><i class="fa-solid fa-bars"></i></button>
+            <div class="hidden sm:flex items-center gap-2">
+              <span class="pill">Auto’s <span class="ml-1 text-gray-400">26</span></span>
+              <span class="pill">Verkocht <span class="ml-1 text-gray-400">3</span></span>
+              <span class="pill">Gearchiveerd <span class="ml-1 text-gray-400">781</span></span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="btn btn-ghost" id="openImport"><i class="fa-solid fa-file-arrow-up"></i>Importeer</button>
+            <button class="btn btn-primary" id="openNewModal"><i class="fa-solid fa-plus"></i>Toevoegen</button>
+          </div>
         </header>
 
         <!-- RDW KENTEKEN INTAKE -->
@@ -55,10 +104,10 @@
             </div>
             <div class="mt-3 grid sm:grid-cols-[280px,1fr,auto] gap-3">
               <div class="relative">
-                <input id="kenteken" placeholder="Bijv. SX348F" class="w-full px-3 py-2 border rounded-lg uppercase" inputmode="latin" />
+                <input id="kenteken" placeholder="Bijv. SX348F" class="w-full ring-focus px-3 py-2 border rounded-lg" inputmode="latin" />
                 <span class="absolute right-2 top-2.5 text-gray-400"><i class="fa-solid fa-square-parking"></i></span>
               </div>
-              <input id="kmstand" placeholder="KM-stand (optioneel)" class="px-3 py-2 border rounded-lg" />
+              <input id="kmstand" placeholder="KM-stand (optioneel)" class="ring-focus px-3 py-2 border rounded-lg" />
               <button id="fetchRDW" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Ophalen</button>
             </div>
             <div id="rdwPreview" class="hidden mt-4 border rounded-lg p-3 bg-slate-50">
@@ -68,212 +117,256 @@
                 <button id="openVehicleDetail" class="btn"><i class="fa-regular fa-eye"></i> Volledige voertuigkaart</button>
               </div>
             </div>
-            <div id="err" class="mt-3 text-sm text-[var(--danger)]"></div>
           </div>
         </section>
 
-        <!-- VOERTUIGEN LIJST (demo) -->
+        <!-- VOERTUIGEN LIJST (demo item) -->
         <section class="px-4 pb-8">
           <div class="flex items-center justify-between mb-2">
-            <div class="text-sm text-gray-500">Overzicht</div>
+            <div class="text-sm text-gray-500 table-head">Overzicht</div>
             <div class="relative">
-              <input id="search" placeholder="Zoeken…" class="px-3 py-2 border rounded-lg w-64" />
+              <input id="search" placeholder="Zoeken…" class="ring-focus px-3 py-2 border rounded-lg w-64" />
               <i class="fa-solid fa-search text-gray-400 absolute right-3 top-2.5"></i>
             </div>
           </div>
 
           <div id="vehicleList" class="space-y-2">
-            <div class="veh-row grid grid-cols-[52px,1fr,auto,auto] gap-3 items-center">
+            <div class="veh-row table-like">
               <div class="w-12 h-12 rounded-md bg-gray-200 overflow-hidden relative">
                 <img alt="" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=400" />
+                <span class="sticker">Nieuw binnen</span>
               </div>
               <div>
                 <div class="font-semibold">Volkswagen Golf Plus 1.4 TSI Comfortline</div>
                 <div class="text-sm text-gray-500">04/2011 • 5-deurs • 88.541 KM • APK tot 01-04-2026 • Staldagen: 23</div>
+                <div class="mt-1 flex flex-wrap gap-1">
+                  <span class="tag"><i class="fa-solid fa-globe"></i> GP</span>
+                  <span class="tag"><i class="fa-solid fa-photo-film"></i> 12</span>
+                  <span class="tag"><i class="fa-brands fa-youtube"></i> Video</span>
+                  <span class="tag"><i class="fa-solid fa-bullhorn"></i> Advertentie</span>
+                </div>
               </div>
               <div class="text-right font-semibold">€ 12.500,00</div>
               <div class="flex items-center gap-2 justify-end">
-                <button class="btn btn-icon" title="Bewerken"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-icon" data-action="edit" title="Bewerken"><i class="fa-solid fa-pen"></i></button>
                 <button class="btn btn-icon" title="Klonen"><i class="fa-solid fa-clone"></i></button>
                 <button class="btn btn-icon" title="Verwijderen"><i class="fa-solid fa-trash"></i></button>
               </div>
             </div>
           </div>
         </section>
-
-        <!-- FULLSCREEN VEHICLE DETAIL -->
-        <dialog id="vehicleDetail" class="w-[min(1100px,96vw)] max-h-[90vh] rounded-2xl border p-0 overflow-hidden">
-          <form method="dialog" class="bg-white">
-            <div class="h-12 flex items-center justify-between px-4 border-b">
-              <div class="font-semibold">Voertuiggegevens</div>
-              <button class="btn btn-icon" value="cancel" aria-label="Sluiten"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div class="p-4 grid lg:grid-cols-2 gap-4 max-h-[70vh] overflow-auto">
-              <section class="border rounded-xl p-4">
-                <div class="text-sm text-gray-500 mb-2">Samenvatting</div>
-                <div class="kv" id="vdSummary"></div>
-              </section>
-
-              <section class="border rounded-xl p-4">
-                <div class="text-sm text-gray-500 mb-2">Technische details</div>
-
-                <div class="mb-3">
-                  <div class="font-semibold mb-1">Basis</div>
-                  <div class="kv" id="vdBasis"></div>
-                </div>
-
-                <div class="mb-3">
-                  <div class="font-semibold mb-1">Brandstoffen</div>
-                  <div id="vdBrandstoffen" class="space-y-2"></div>
-                </div>
-
-                <div class="mb-3">
-                  <div class="font-semibold mb-1">Kleuren</div>
-                  <div id="vdKleuren" class="space-y-1"></div>
-                </div>
-
-                <div class="mb-3">
-                  <div class="font-semibold mb-1">Carrosserie</div>
-                  <div id="vdCarrosserie" class="space-y-1"></div>
-                </div>
-
-                <div>
-                  <div class="font-semibold mb-1">Assen</div>
-                  <div id="vdAssen" class="space-y-1"></div>
-                </div>
-              </section>
-            </div>
-
-            <div class="p-4 border-t text-right">
-              <button class="btn" value="cancel">Sluiten</button>
-            </div>
-          </form>
-        </dialog>
-
-        <!-- TOAST -->
-        <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg border bg-white shadow hidden"></div>
       </main>
     </div>
 
+    <!-- FULLSCREEN VEHICLE DETAIL (partial) -->
+    <dialog id="vehicleDetail" class="w-[min(1100px,96vw)] max-h-[90vh] rounded-2xl border p-0 overflow-hidden">
+      <form method="dialog" class="bg-white">
+        <div class="h-12 flex items-center justify-between px-4 border-b">
+          <div class="font-semibold">Voertuiggegevens</div>
+          <button class="btn btn-icon" value="cancel" aria-label="Sluiten"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="p-4 grid lg:grid-cols-2 gap-4 max-h-[70vh] overflow-auto">
+          <!-- Summary card -->
+          <section class="border rounded-xl p-4">
+            <div class="text-sm text-gray-500 mb-2">Samenvatting</div>
+            <div class="kv" id="vdSummary"></div>
+          </section>
+
+          <!-- Details -->
+          <section class="border rounded-xl p-4">
+            <div class="text-sm text-gray-500 mb-2">Technische details</div>
+
+            <div class="mb-3">
+              <div class="font-semibold mb-1">Basis</div>
+              <div class="kv" id="vdBasis"></div>
+            </div>
+
+            <div class="mb-3">
+              <div class="font-semibold mb-1">Brandstoffen</div>
+              <div id="vdBrandstoffen" class="space-y-2"></div>
+            </div>
+
+            <div class="mb-3">
+              <div class="font-semibold mb-1">Kleuren</div>
+              <div id="vdKleuren" class="space-y-1"></div>
+            </div>
+
+            <div class="mb-3">
+              <div class="font-semibold mb-1">Carrosserie</div>
+              <div id="vdCarrosserie" class="space-y-1"></div>
+            </div>
+
+            <div>
+              <div class="font-semibold mb-1">Assen</div>
+              <div id="vdAssen" class="space-y-1"></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="p-4 border-t text-right">
+          <button class="btn" value="cancel">Sluiten</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg border bg-white shadow hidden"></div>
+
+    <!-- JS -->
     <script type="module">
+      // ========= IMPORTANT =========
+      // On production (prodrivenet.com) we use SAME-ORIGIN: ''.
+      // In local dev (file server / VSCode Live Server) we fall back to http://localhost:3001.
       const API_BASE =
         (location.hostname.endsWith('prodrivenet.com') || location.hostname === 'www.prodrivenet.com')
-          ? '' : 'http://localhost:3001';
+          ? ''
+          : 'http://localhost:3001';
 
-      const $=(q,r=document)=>r.querySelector(q);
-      const toast=(m,k='info')=>{const el=$('#toast');el.textContent=m;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),2500)};
+      const $  = (q,root=document)=>root.querySelector(q);
+      const $$ = (q,root=document)=>[...root.querySelectorAll(q)];
+      const toast = (msg, kind='info')=>{
+        const el = $('#toast');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        el.style.borderColor = kind==='error' ? 'var(--danger)' : kind==='ok' ? 'var(--success)' : '#e5e7eb';
+        el.style.color = kind==='error' ? 'var(--danger)' : 'inherit';
+        setTimeout(()=>el.classList.add('hidden'), 2800);
+      };
 
-      function normPlate(input){
-        return input.trim().toUpperCase().replace(/-/g,'');
-      }
-      function isPlate(p){ return /^[A-Z0-9]{1,8}$/.test(p); }
-
+      // ---- RDW proxy + normalizer
       async function fetchRDW(kenteken){
-        const r = await fetch(`${API_BASE}/api/rdw?kenteken=${encodeURIComponent(kenteken)}`);
-        if(!r.ok){
-          let t=`RDW ${r.status}`;
-          try{const j=await r.json();t=j.detail||j.error||t;}catch{}
-          throw new Error(t);
+        const res = await fetch(`${API_BASE}/api/rdw?kenteken=${encodeURIComponent(kenteken)}`);
+        if(!res.ok){
+          let msg = `RDW ${res.status}`;
+          try { const j = await res.json(); msg = j.detail || j.error || msg; } catch {}
+          throw new Error(msg);
         }
-        return r.json();
+        const data = await res.json();
+        const s = data.summary || {};
+        const d = data.details || {};
+        return { s, d, raw: data };
       }
 
       const rdwKV = $('#rdwKV');
       const rdwPreview = $('#rdwPreview');
-      const err = $('#err');
-      let last = null;
+      let lastFetch = null;
 
-      $('#fetchRDW').addEventListener('click', async ()=>{
-        err.textContent='';
-        const plate = normPlate($('#kenteken').value);
-        if(!isPlate(plate)){ err.textContent='Ongeldig kentekenformaat.'; return; }
-
+      $('#fetchRDW')?.addEventListener('click', async ()=>{
+        const kenteken = $('#kenteken').value.trim().replace(/-/g,'').toUpperCase();
+        if(!kenteken) return toast('Vul een kenteken in','error');
         try{
-          const data = await fetchRDW(plate);
-          last = data;
-
-          // preview
-          rdwKV.innerHTML='';
-          const s=data.summary||{};
-          const pairs={
-            'Merk/Type': `${s.merk??'-'} ${s.handelsbenaming??''}`.trim(),
-            'Bouwjaar': s.bouwjaar ?? (s.datum_eerste_toelating? String(s.datum_eerste_toelating).slice(0,4):'-'),
+          lastFetch = await fetchRDW(kenteken);
+          const { s } = lastFetch;
+          rdwKV.innerHTML = '';
+          const pairs = {
+            'Merk/Type': `${s.merk ?? '-'} ${s.handelsbenaming ?? ''}`.trim(),
+            'Bouwjaar': s.bouwjaar ?? (s.datum_eerste_toelating ? String(s.datum_eerste_toelating).slice(0,4) : '-'),
             'Brandstof': s.brandstof ?? '-',
             'Kleur': s.kleur ?? '-',
             'APK tot': s.apk_vervaldatum ?? '-'
           };
           Object.entries(pairs).forEach(([k,v])=>{
-            const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
-            const vEl=document.createElement('div');vEl.textContent=v??'-';
+            const kEl = document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
+            const vEl = document.createElement('div');vEl.textContent=v ?? '-';
             rdwKV.append(kEl,vEl);
           });
           rdwPreview.classList.remove('hidden');
           toast('RDW-gegevens opgehaald','ok');
         }catch(e){
-          err.textContent=e.message||'Ophalen mislukt';
+          toast(e.message || 'Kon RDW-gegevens niet ophalen','error');
         }
       });
 
-      const dlg = $('#vehicleDetail');
-      $('#openVehicleDetail').addEventListener('click', ()=>{
-        if(!last){ toast('Eerst RDW-gegevens ophalen','error'); return; }
-        const {summary: s, details: d}=last;
+      // FULLSCREEN VEHICLE DETAIL
+      const vehicleDetail = $('#vehicleDetail');
+      $('#openVehicleDetail')?.addEventListener('click', ()=>{
+        if(!lastFetch){ toast('Eerst RDW-gegevens ophalen','error'); return; }
+        const { s, d } = lastFetch;
 
-        const S=$('#vdSummary'); S.innerHTML='';
-        const P={
-          'Kenteken': s.kenteken,'Merk': s.merk,'Type': s.handelsbenaming,'Voertuigsoort': s.voertuigsoort,
-          'Eerste toelating': s.datum_eerste_toelating,'APK vervaldatum': s.apk_vervaldatum,
-          'Kleur': s.kleur,'Brandstof (hoofdzakelijk)': s.brandstof,'Zitplaatsen': s.zitplaatsen,'Deuren': s.deuren,
-          'Massa rijklaar (kg)': s.massa_rijklaar_kg
+        // Summary
+        const kv = $('#vdSummary'); kv.innerHTML='';
+        const sumPairs = {
+          'Kenteken': s.kenteken,
+          'Merk': s.merk,
+          'Type': s.handelsbenaming,
+          'Voertuigsoort': s.voertuigsoort ?? '',
+          'Eerste toelating': s.datum_eerste_toelating ?? '',
+          'APK vervaldatum': s.apk_vervaldatum ?? '',
+          'Kleur': s.kleur ?? '',
+          'Brandstof (hoofdzakelijk)': s.brandstof ?? '',
+          'Zitplaatsen': s.zitplaatsen ?? '',
+          'Deuren': s.deuren ?? '',
+          'Massa rijklaar (kg)': s.massa_rijklaar_kg ?? '',
         };
-        Object.entries(P).forEach(([k,v])=>{
-          const a=document.createElement('div');a.className='text-gray-500';a.textContent=k;
-          const b=document.createElement('div');b.textContent=(v??'-')+'';
-          S.append(a,b);
+        Object.entries(sumPairs).forEach(([k,v])=>{
+          const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
+          const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
+          kv.append(kEl,vEl);
         });
 
-        const B=$('#vdBasis'); B.innerHTML='';
-        Object.entries(d?.basis||{}).forEach(([k,v])=>{
-          const a=document.createElement('div');a.className='text-gray-500';a.textContent=k.replace(/_/g,' ');
-          const b=document.createElement('div');b.textContent=(v??'-')+'';
-          B.append(a,b);
+        // Basis
+        const b = d?.basis || {};
+        const kb = $('#vdBasis'); kb.innerHTML='';
+        const basisPairs = {
+          'Inrichting': b.inrichting,
+          'Catalogusprijs (€)': b.catalogusprijs,
+          'Cilinders': b.aantal_cilinders ?? b.cilinders,
+          'Cilinderinhoud (cc)': b.cilinderinhoud_cc,
+          'Lengte (cm)': b.lengte_cm, 'Breedte (cm)': b.breedte_cm, 'Hoogte (cm)': b.hoogte_cm,
+          'Wielbasis (cm)': b.wielbasis_cm, 'EU categorie': b.eu_voertuigcategorie,
+          'Type': b.type, 'Variant': b.variant, 'Uitvoering': b.uitvoering,
+          'WAM verzekerd': b.wam_verzekerd, 'Taxi': b.taxi_indicator,
+          'Terugroepactie': b.openstaande_terugroepactie_indicator
+        };
+        Object.entries(basisPairs).forEach(([k,v])=>{
+          const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
+          const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
+          kb.append(kEl,vEl);
         });
 
-        const BF=$('#vdBrandstoffen'); BF.innerHTML='';
-        (d?.brandstoffen||[]).forEach(f=>{
-          const line=document.createElement('div');line.className='text-sm';
-          line.textContent=`${f.omschrijving??'—'} · CO₂ ${f.co2_gecombineerd_g_km??'—'} g/km · Vermogen ${f.nettomaximumvermogen_kw??'—'} kW`;
-          BF.append(line);
+        // Brandstoffen
+        const bf = $('#vdBrandstoffen'); bf.innerHTML='';
+        (d?.brandstoffen || []).forEach(f=>{
+          const line = document.createElement('div');
+          line.className='text-sm';
+          line.textContent = `${f.omschrijving ?? '—'} · CO₂ ${f.co2_gecombineerd_g_km ?? '—'} g/km · Vermogen ${f.nettomaximumvermogen_kw ?? '—'} kW`;
+          bf.append(line);
         });
 
-        const KL=$('#vdKleuren'); KL.innerHTML='';
-        (d?.kleuren||[]).forEach(k=>{
-          const line=document.createElement('div');line.className='text-sm';
-          line.textContent=[k.eerste_kleur,k.tweede_kleur].filter(Boolean).join(' / ')||'—';
-          KL.append(line);
+        // Kleuren
+        const kl = $('#vdKleuren'); kl.innerHTML='';
+        (d?.kleuren || []).forEach(k=>{
+          const line = document.createElement('div');
+          line.className='text-sm';
+          line.textContent = [k.eerste_kleur, k.tweede_kleur].filter(Boolean).join(' / ') || '—';
+          kl.append(line);
         });
 
-        const CAR=$('#vdCarrosserie'); CAR.innerHTML='';
-        (d?.carrosserie||[]).forEach(c=>{
-          const line=document.createElement('div');line.className='text-sm';
-          line.textContent=c.carrosserietype_omschrijving||'—'; CAR.append(line);
+        // Carrosserie
+        const car = $('#vdCarrosserie'); car.innerHTML='';
+        (d?.carrosserie || []).forEach(c=>{
+          const line = document.createElement('div'); line.className='text-sm';
+          line.textContent = c.carrosserietype_omschrijving || '—';
+          car.append(line);
         });
 
-        const AS=$('#vdAssen'); AS.innerHTML='';
-        (d?.assen||[]).forEach(a=>{
-          const line=document.createElement('div');line.className='text-sm';
-          line.textContent=`As ${a.asnummer??''} · Wielbasis ${a.wielbasis??'—'} cm · Technische max aslast ${a.technische_max_aslast??'—'} kg`;
-          AS.append(line);
+        // Assen
+        const as = $('#vdAssen'); as.innerHTML='';
+        (d?.assen || []).forEach(a=>{
+          const line = document.createElement('div'); line.className='text-sm';
+          line.textContent = `As ${a.asnummer ?? ''} · Wielbasis ${a.wielbasis ?? '—'} cm · Technische max aslast ${a.technische_max_aslast ?? '—'} kg`;
+          as.append(line);
         });
 
-        dlg.showModal();
+        vehicleDetail.showModal();
       });
 
-      $('#search').addEventListener('input', e=>{
-        const q=e.target.value.toLowerCase();
+      // Search filter
+      $('#search')?.addEventListener('input', e=>{
+        const q = e.target.value.toLowerCase();
         document.querySelectorAll('#vehicleList .veh-row').forEach(row=>{
-          row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
+          row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
         });
       });
     </script>
