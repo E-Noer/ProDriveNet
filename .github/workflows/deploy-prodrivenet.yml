@@ -1,40 +1,16 @@
-name: Deploy ProDriveNet
-
-on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
+name: SSH test
+on: [workflow_dispatch]
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH Deploy
-        uses: appleboy/ssh-action@v1.0.3
-        env:
-          DEPLOY_PAT: ${{ secrets.DEPLOY_PAT }}   # <-- make sure this exists
+      - uses: appleboy/ssh-action@v1.0.3
         with:
-          host:     ${{ secrets.SSH_HOST }}       # 185.103.240.31
-          port:     ${{ secrets.SSH_PORT }}       # usually 22
-          username: ${{ secrets.SSH_USER }}       # root
-          key:      ${{ secrets.SSH_PRIVATE_KEY }}# your OpenSSH private key
-          envs:     DEPLOY_PAT                    # forward it into the shell
+          host:     ${{ secrets.SSH_HOST }}
+          port:     ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key:      ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            set -euo pipefail
-
-            FRONTEND_DIR=/var/www/prodrivenet.com/html
-            FE_URL="https://${DEPLOY_PAT}@github.com/E-Noer/ProDriveNet.git"
-
-            mkdir -p "$FRONTEND_DIR"
-            git config --global --add safe.directory "$FRONTEND_DIR"
-
-            if [ ! -d "$FRONTEND_DIR/.git" ]; then
-              git clone --depth 1 "$FE_URL" "$FRONTEND_DIR"
-            else
-              git -C "$FRONTEND_DIR" remote set-url origin "$FE_URL"
-              git -C "$FRONTEND_DIR" fetch --all
-              git -C "$FRONTEND_DIR" reset --hard origin/main
-            fi
-
-            nginx -t
-            systemctl reload nginx
+            whoami
+            hostname
