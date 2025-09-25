@@ -218,9 +218,7 @@
       // ========= IMPORTANT =========
       // On production (prodrivenet.com) we use SAME-ORIGIN: ''.
       // In local dev (file server / VSCode Live Server) we fall back to http://localhost:3001.
- <!-- only the important bits shown here; paste the whole file you have, and ensure these lines exist -->
 
-<!-- Inside <script type="module"> at the bottom -->
 const API_BASE =
   (location.hostname === 'prodrivenet.com' || location.hostname === 'www.prodrivenet.com')
     ? ''  // same-origin in production
