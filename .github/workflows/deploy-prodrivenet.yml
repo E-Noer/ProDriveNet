@@ -34,9 +34,9 @@ jobs:
                 && git reset --hard origin/main
             fi
 
-            chown -R www-data:www-data "$FRONTEND_DIR"
-            find "$FRONTEND_DIR" -type d -exec chmod 755 {} \;
-            find "$FRONTEND_DIR" -type f -exec chmod 644 {} \;
+          
+
+            
 
             nginx -t
             systemctl reload nginx
