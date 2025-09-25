@@ -18,28 +18,28 @@ const PUBLIC_DIR = path.join(__dirname);
 app.get('/env.js', (req, res) => {
   const url  = process.env.SUPABASE_URL || '';
   const anon = process.env.SUPABASE_ANON_KEY || '';
-  res.set('Cache-Control', 'no-store'); // ensure fresh values during dev
+  res.set('Cache-Control', 'no-store');
   res.type('application/javascript').send(
     `window.__SUPABASE_URL__=${JSON.stringify(url)};window.__SUPABASE_ANON_KEY__=${JSON.stringify(anon)};`
   );
 });
 
-// --- RDW Open Data proxy (uses App Token if provided)
-//     Datasets:
-//       - Basisgegevens voertuigen: m9d7-ebf2
-//       - Brandstof:               8ys7-d773
-//       - Kleur:                   ihha-7xnj
 // --- RDW Open Data proxy (full merge)
 app.get('/api/rdw', async (req, res) => {
   const plate = String(req.query.kenteken || '').replace(/-/g, '').toUpperCase();
   if (!plate) return res.status(400).json({ error: 'kenteken ontbreekt' });
+
+  console.log(`[RDW] request for kenteken=${plate} from ${req.ip}`);
 
   const headers = {};
   if (process.env.RDW_APP_TOKEN) headers['X-App-Token'] = process.env.RDW_APP_TOKEN;
 
   const q = async (url) => {
     const r = await fetch(url, { headers });
-    if (!r.ok) throw new Error(`RDW ${r.status} ${r.statusText} for ${url}`);
+    if (!r.ok) {
+      const text = await r.text().catch(()=>null);
+      throw new Error(`RDW ${r.status} ${r.statusText} for ${url} ${text ? ` - ${text.slice(0,200)}` : ''}`);
+    }
     return r.json();
   };
 
@@ -49,7 +49,6 @@ app.get('/api/rdw', async (req, res) => {
   };
 
   try {
-    // 1) Fetch all relevant datasets in parallel
     const [
       basisArr,
       brandstofArr,
@@ -71,7 +70,6 @@ app.get('/api/rdw', async (req, res) => {
       return res.status(404).json({ error: 'Geen voertuig gevonden voor kenteken.' });
     }
 
-    // 2) Normalize/shape datasets
     const fuels = (brandstofArr || []).map(b => ({
       volgnummer: b.brandstof_volgnummer ? Number(b.brandstof_volgnummer) : null,
       omschrijving: b.brandstof_omschrijving || null,
@@ -111,7 +109,6 @@ app.get('/api/rdw', async (req, res) => {
       aslast_technisch_toegestaan: a.aslast_technisch_toegestaan ? Number(a.aslast_technisch_toegestaan) : null,
     }));
 
-    // 3) Build summary + details
     const summary = {
       kenteken: plate,
       merk: basis.merk || null,
@@ -181,6 +178,7 @@ app.get('/api/rdw', async (req, res) => {
       }
     });
   } catch (e) {
+    console.error('[RDW] error', e);
     res.status(500).json({ error: 'RDW service fout', detail: String(e?.message || e) });
   }
 });

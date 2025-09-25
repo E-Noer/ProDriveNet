@@ -4,22 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>E-Noer | Start</title>
-  <script src="/env.js"></script>
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-    const supabase = createClient(window.__SUPABASE_URL__, window.__SUPABASE_ANON_KEY__);
-
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        window.location.href = "/platform.html";
-      } else {
-        window.location.href = "/auth.html";
-      }
-    })();
-  </script>
   <style>html,body{height:100%}body{display:grid;place-items:center;font-family:ui-sans-serif,system-ui}</style>
+  <script>
+    // Always redirect to platform.html immediately
+    window.location.replace('/platform.html');
+  </script>
 </head>
 <body>
   Doorsturen…
