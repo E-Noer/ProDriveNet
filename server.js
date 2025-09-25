@@ -1,4 +1,3 @@
-// server.js
 import 'dotenv/config';
 import express from 'express';
 import path from 'path';
@@ -6,46 +5,45 @@ import cors from 'cors';
 
 const app = express();
 
-// --- Basic middleware
-app.use(cors());
+// CORS: allow local dev tools; same-origin (prodrivenet.com) won’t hit CORS at all.
+const allowed = new Set([
+  'http://127.0.0.1:15500', // VSCode Live Server (your screenshot)
+  'http://127.0.0.1:5500',
+  'http://localhost:15500',
+  'http://localhost:5500',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+  'https://prodrivenet.com',
+  'https://www.prodrivenet.com'
+]);
+app.use(cors({
+  origin: (origin, cb) => (!origin ? cb(null, true) : cb(null, allowed.has(origin))),
+  credentials: false
+}));
+
 app.use(express.json({ limit: '12mb' }));
 
-// --- Paths (ESM-friendly)
+// Static (serve index.html, platform.html, etc.)
 const __dirname = path.resolve();
-const PUBLIC_DIR = path.join(__dirname);
+app.use(express.static(__dirname, { extensions: ['html'], cacheControl: false }));
 
-// --- Expose safe env values for the browser (Supabase only)
-app.get('/env.js', (req, res) => {
-  const url  = process.env.SUPABASE_URL || '';
-  const anon = process.env.SUPABASE_ANON_KEY || '';
-  res.set('Cache-Control', 'no-store');
-  res.type('application/javascript').send(
-    `window.__SUPABASE_URL__=${JSON.stringify(url)};window.__SUPABASE_ANON_KEY__=${JSON.stringify(anon)};`
-  );
-});
+const parseDate = (s) => (s && s.length === 8) ? `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}` : null;
 
-// --- RDW Open Data proxy (full merge)
 app.get('/api/rdw', async (req, res) => {
-  const plate = String(req.query.kenteken || '').replace(/-/g, '').toUpperCase();
+  const plate = String(req.query.kenteken || '').replace(/-/g,'').toUpperCase();
   if (!plate) return res.status(400).json({ error: 'kenteken ontbreekt' });
-
-  console.log(`[RDW] request for kenteken=${plate} from ${req.ip}`);
 
   const headers = {};
   if (process.env.RDW_APP_TOKEN) headers['X-App-Token'] = process.env.RDW_APP_TOKEN;
+  if (process.env.RDW_APP_SECRET) headers['X-App-Secret'] = process.env.RDW_APP_SECRET;
 
   const q = async (url) => {
     const r = await fetch(url, { headers });
     if (!r.ok) {
-      const text = await r.text().catch(()=>null);
-      throw new Error(`RDW ${r.status} ${r.statusText} for ${url} ${text ? ` - ${text.slice(0,200)}` : ''}`);
+      const t = await r.text().catch(()=>null);
+      throw new Error(`RDW ${r.status} ${r.statusText} for ${url}${t?` — ${t.slice(0,200)}`:''}`);
     }
     return r.json();
-  };
-
-  const parseDate = (s) => {
-    if (!s || typeof s !== 'string' || s.length !== 8) return null;
-    return `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`;
   };
 
   try {
@@ -66,9 +64,8 @@ app.get('/api/rdw', async (req, res) => {
     ]);
 
     const basis = basisArr?.[0] || {};
-    if (!basis.merk && !basis.handelsbenaming) {
+    if (!basis.merk && !basis.handelsbenaming)
       return res.status(404).json({ error: 'Geen voertuig gevonden voor kenteken.' });
-    }
 
     const fuels = (brandstofArr || []).map(b => ({
       volgnummer: b.brandstof_volgnummer ? Number(b.brandstof_volgnummer) : null,
@@ -106,7 +103,7 @@ app.get('/api/rdw', async (req, res) => {
       technische_max_aslast: a.technische_max_aslast ? Number(a.technische_max_aslast) : null,
       wielbasis: a.wielbasis ? Number(a.wielbasis) : null,
       aantal_assen: a.aantal_assen ? Number(a.aantal_assen) : null,
-      aslast_technisch_toegestaan: a.aslast_technisch_toegestaan ? Number(a.aslast_technisch_toegestaan) : null,
+      aslast_technisch_toegestaan: a.aslast_technisch_toegestaan ? Number(a.aslast_technisch_toegestaan) : null
     }));
 
     const summary = {
@@ -136,7 +133,7 @@ app.get('/api/rdw', async (req, res) => {
         handelsbenaming: basis.handelsbenaming || null,
         inrichting: basis.inrichting || null,
         catalogusprijs: basis.catalogusprijs ? Number(basis.catalogusprijs) : null,
-        cilinders: basis.aantal_cilinders ? Number(basis.aantal_cilinders) : null,
+        aantal_cilinders: basis.aantal_cilinders ? Number(basis.aantal_cilinders) : null,
         cilinderinhoud_cc: basis.cilinderinhoud ? Number(basis.cilinderinhoud) : null,
         lengte_cm: basis.lengte ? Number(basis.lengte) : null,
         breedte_cm: basis.breedte ? Number(basis.breedte) : null,
@@ -169,12 +166,8 @@ app.get('/api/rdw', async (req, res) => {
       summary,
       details,
       _raw: {
-        basis: basisArr,
-        brandstof: brandstofArr,
-        kleur: kleurArr,
-        carrosserie: carrosserieArr,
-        carrosserie_specifiek: carroSpecArr,
-        assen: asArr
+        basis: basisArr, brandstof: brandstofArr, kleur: kleurArr,
+        carrosserie: carrosserieArr, carrosserie_specifiek: carroSpecArr, assen: asArr
       }
     });
   } catch (e) {
@@ -183,16 +176,7 @@ app.get('/api/rdw', async (req, res) => {
   }
 });
 
-// --- Health check (optional)
-app.get('/api/health', (req, res) => {
-  res.json({ ok: true, env: { supabase: !!process.env.SUPABASE_URL, rdwAppToken: !!process.env.RDW_APP_TOKEN } });
-});
-
-// --- Static files (serve your HTML from the project root)
-app.use(express.static(PUBLIC_DIR, { extensions: ['html'], cacheControl: false }));
-
-// --- Start server
 const PORT = Number(process.env.PORT || 3001);
 app.listen(PORT, () => {
-  console.log(`E-Noer dev server on http://localhost:${PORT}`);
+  console.log(`Server online on http://localhost:${PORT} (proxied by Nginx for https://prodrivenet.com)`);
 });
