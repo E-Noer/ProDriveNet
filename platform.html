@@ -6,13 +6,7 @@
     <title>E-Noer Auto Platform</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-      referrerpolicy="no-referrer"
-    />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
     <style>
       :root{
         --bg:#f5f6f8; --panel:#ffffff; --muted:#6b7280; --ink:#0f172a;
@@ -43,7 +37,7 @@
     </style>
   </head>
 
-  <body class="min-h-screen bg-[var(--bg)] text-[var(--ink)]">
+  <body class="min-h-screen bg-[var(--bg)] text-[var(--ink)]" data-build="platform-2025-09-26-16-00">
     <div class="flex min-h-screen">
       <aside class="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col">
         <div class="h-14 flex items-center gap-2 px-4 border-b">
@@ -201,11 +195,9 @@
 
     <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg border bg-white shadow hidden"></div>
 
-    <script type="module">
-      const $ = (sel) => document.querySelector(sel);
-
-      function toast(msg, kind='ok'){
-        const el = $('#toast');
+    <script>
+      function toast(msg, kind){
+        const el = document.getElementById('toast');
         el.textContent = msg || '';
         el.classList.remove('hidden');
         el.style.borderColor = kind==='error' ? 'var(--danger)' : kind==='warn' ? 'var(--warning)' : '#e5e7eb';
@@ -227,18 +219,25 @@
         return res.json();
       }
 
-      const rdwKV = $('#rdwKV');
-      const rdwPreview = $('#rdwPreview');
+      const elKenteken = document.getElementById('kenteken');
+      const elKmstand  = document.getElementById('kmstand');
+      const elFetch    = document.getElementById('fetchRDW');
+      const elPreview  = document.getElementById('rdwPreview');
+      const elKV       = document.getElementById('rdwKV');
+      const elOpenVd   = document.getElementById('openVehicleDetail');
+      const elSearch   = document.getElementById('search');
+      const dlgDetail  = document.getElementById('vehicleDetail');
+
       let lastFetch = null;
 
-      $('#fetchRDW')?.addEventListener('click', async ()=>{
-        const kenteken = $('#kenteken').value.trim();
-        if(!kenteken) return toast('Vul een kenteken in','error');
+      elFetch?.addEventListener('click', async ()=>{
+        const kenteken = elKenteken.value.trim();
+        if(!kenteken){ toast('Vul een kenteken in','error'); return; }
         try{
           const data = await fetchRDW(kenteken);
           lastFetch = data;
           const s = data.summary || {};
-          rdwKV.innerHTML = '';
+          elKV.innerHTML = '';
           const pairs = {
             'Merk/Type': `${s.merk ?? '-'} ${s.handelsbenaming ?? ''}`.trim(),
             'Bouwjaar': s.bouwjaar ?? (s.datum_eerste_toelating ? String(s.datum_eerste_toelating).slice(0,4) : '-'),
@@ -246,24 +245,23 @@
             'Kleur': s.kleur ?? '-',
             'APK tot': s.apk_vervaldatum ?? '-'
           };
-          Object.entries(pairs).forEach(([k,v])=>{
-            const kEl = document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
-            const vEl = document.createElement('div');vEl.textContent=v ?? '-';
-            rdwKV.append(kEl,vEl);
-          });
-          rdwPreview.classList.remove('hidden');
+          for (const [k,v] of Object.entries(pairs)){
+            const kEl = document.createElement('div'); kEl.className='text-gray-500'; kEl.textContent=k;
+            const vEl = document.createElement('div'); vEl.textContent=v ?? '-';
+            elKV.append(kEl,vEl);
+          }
+          elPreview.classList.remove('hidden');
           toast('RDW-gegevens opgehaald','ok');
         }catch(e){
           toast(e.message || 'Kon RDW-gegevens niet ophalen','error');
         }
       });
 
-      const vehicleDetail = $('#vehicleDetail');
-      $('#openVehicleDetail')?.addEventListener('click', ()=>{
+      elOpenVd?.addEventListener('click', ()=>{
         if(!lastFetch){ toast('Eerst RDW-gegevens ophalen','error'); return; }
         const { summary: s, details: d } = lastFetch;
 
-        const kv = $('#vdSummary'); kv.innerHTML='';
+        const kv = document.getElementById('vdSummary'); kv.innerHTML='';
         const sumPairs = {
           'Kenteken': s.kenteken,
           'Merk': s.merk,
@@ -277,14 +275,14 @@
           'Deuren': s.deuren ?? '',
           'Massa rijklaar (kg)': s.massa_rijklaar_kg ?? '',
         };
-        Object.entries(sumPairs).forEach(([k,v])=>{
+        for (const [k,v] of Object.entries(sumPairs)){
           const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
           const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
           kv.append(kEl,vEl);
-        });
+        }
 
         const b = d?.basis || {};
-        const kb = $('#vdBasis'); kb.innerHTML='';
+        const kb = document.getElementById('vdBasis'); kb.innerHTML='';
         const basisPairs = {
           'Inrichting': b.inrichting,
           'Catalogusprijs (€)': b.catalogusprijs,
@@ -296,13 +294,13 @@
           'WAM verzekerd': b.wam_verzekerd, 'Taxi': b.taxi_indicator,
           'Terugroepactie': b.openstaande_terugroepactie_indicator
         };
-        Object.entries(basisPairs).forEach(([k,v])=>{
+        for (const [k,v] of Object.entries(basisPairs)){
           const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
           const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
           kb.append(kEl,vEl);
-        });
+        }
 
-        const bf = $('#vdBrandstoffen'); bf.innerHTML='';
+        const bf = document.getElementById('vdBrandstoffen'); bf.innerHTML='';
         (d?.brandstoffen || []).forEach(f=>{
           const line = document.createElement('div');
           line.className='text-sm';
@@ -310,7 +308,7 @@
           bf.append(line);
         });
 
-        const kl = $('#vdKleuren'); kl.innerHTML='';
+        const kl = document.getElementById('vdKleuren'); kl.innerHTML='';
         (d?.kleuren || []).forEach(k=>{
           const line = document.createElement('div');
           line.className='text-sm';
@@ -318,24 +316,24 @@
           kl.append(line);
         });
 
-        const car = $('#vdCarrosserie'); car.innerHTML='';
+        const car = document.getElementById('vdCarrosserie'); car.innerHTML='';
         (d?.carrosserie || []).forEach(c=>{
           const line = document.createElement('div'); line.className='text-sm';
           line.textContent = c.carrosserietype_omschrijving || '—';
           car.append(line);
         });
 
-        const as = $('#vdAssen'); as.innerHTML='';
+        const as = document.getElementById('vdAssen'); as.innerHTML='';
         (d?.assen || []).forEach(a=>{
           const line = document.createElement('div'); line.className='text-sm';
           line.textContent = `As ${a.asnummer ?? ''} · Wielbasis ${a.wielbasis ?? '—'} cm · Technische max aslast ${a.technische_max_aslast ?? '—'} kg`;
           as.append(line);
         });
 
-        vehicleDetail.showModal();
+        dlgDetail.showModal();
       });
 
-      $('#search')?.addEventListener('input', e=>{
+      elSearch?.addEventListener('input', e=>{
         const q = e.target.value.toLowerCase();
         document.querySelectorAll('#vehicleList .veh-row').forEach(row=>{
           row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
