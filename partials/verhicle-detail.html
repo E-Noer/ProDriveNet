@@ -1,0 +1,48 @@
+<dialog id="vehicleDetail" class="w-[min(1100px,96vw)] max-h-[90vh] rounded-2xl border p-0 overflow-hidden">
+  <form method="dialog" class="bg-white">
+    <div class="h-12 flex items-center justify-between px-4 border-b">
+      <div class="font-semibold">Voertuiggegevens</div>
+      <button class="btn btn-icon" value="cancel" aria-label="Sluiten"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="p-4 grid lg:grid-cols-2 gap-4 max-h-[70vh] overflow-auto">
+      <section class="border rounded-xl p-4">
+        <div class="text-sm text-gray-500 mb-2">Samenvatting</div>
+        <div class="kv" id="vdSummary"></div>
+      </section>
+
+      <section class="border rounded-xl p-4">
+        <div class="text-sm text-gray-500 mb-2">Technische details</div>
+
+        <div class="mb-3">
+          <div class="font-semibold mb-1">Basis</div>
+          <div class="kv" id="vdBasis"></div>
+        </div>
+
+        <div class="mb-3">
+          <div class="font-semibold mb-1">Brandstoffen</div>
+          <div id="vdBrandstoffen" class="space-y-2"></div>
+        </div>
+
+        <div class="mb-3">
+          <div class="font-semibold mb-1">Kleuren</div>
+          <div id="vdKleuren" class="space-y-1"></div>
+        </div>
+
+        <div class="mb-3">
+          <div class="font-semibold mb-1">Carrosserie</div>
+          <div id="vdCarrosserie" class="space-y-1"></div>
+        </div>
+
+        <div>
+          <div class="font-semibold mb-1">Assen</div>
+          <div id="vdAssen" class="space-y-1"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="p-4 border-t text-right">
+      <button class="btn" value="cancel">Sluiten</button>
+    </div>
+  </form>
+</dialog>

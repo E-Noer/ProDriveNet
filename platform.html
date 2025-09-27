@@ -37,7 +37,7 @@
     </style>
   </head>
 
-  <body class="min-h-screen bg-[var(--bg)] text-[var(--ink)]" data-build="platform-2025-09-26-16-00">
+  <body class="min-h-screen bg-[var(--bg)] text-[var(--ink)]" data-build="platform-2025-09-27-15-00">
     <div class="flex min-h-screen">
       <aside class="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col">
         <div class="h-14 flex items-center gap-2 px-4 border-b">
@@ -144,54 +144,8 @@
       </main>
     </div>
 
-    <dialog id="vehicleDetail" class="w-[min(1100px,96vw)] max-h-[90vh] rounded-2xl border p-0 overflow-hidden">
-      <form method="dialog" class="bg-white">
-        <div class="h-12 flex items-center justify-between px-4 border-b">
-          <div class="font-semibold">Voertuiggegevens</div>
-          <button class="btn btn-icon" value="cancel" aria-label="Sluiten"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div class="p-4 grid lg:grid-cols-2 gap-4 max-h-[70vh] overflow-auto">
-          <section class="border rounded-xl p-4">
-            <div class="text-sm text-gray-500 mb-2">Samenvatting</div>
-            <div class="kv" id="vdSummary"></div>
-          </section>
-
-          <section class="border rounded-xl p-4">
-            <div class="text-sm text-gray-500 mb-2">Technische details</div>
-
-            <div class="mb-3">
-              <div class="font-semibold mb-1">Basis</div>
-              <div class="kv" id="vdBasis"></div>
-            </div>
-
-            <div class="mb-3">
-              <div class="font-semibold mb-1">Brandstoffen</div>
-              <div id="vdBrandstoffen" class="space-y-2"></div>
-            </div>
-
-            <div class="mb-3">
-              <div class="font-semibold mb-1">Kleuren</div>
-              <div id="vdKleuren" class="space-y-1"></div>
-            </div>
-
-            <div class="mb-3">
-              <div class="font-semibold mb-1">Carrosserie</div>
-              <div id="vdCarrosserie" class="space-y-1"></div>
-            </div>
-
-            <div>
-              <div class="font-semibold mb-1">Assen</div>
-              <div id="vdAssen" class="space-y-1"></div>
-            </div>
-          </section>
-        </div>
-
-        <div class="p-4 border-t text-right">
-          <button class="btn" value="cancel">Sluiten</button>
-        </div>
-      </form>
-    </dialog>
+    <!-- Partial mount point -->
+    <div id="vehicleDetailMount"></div>
 
     <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg border bg-white shadow hidden"></div>
 
@@ -219,6 +173,105 @@
         return res.json();
       }
 
+      // ---- Partial loader ----
+      async function loadPartial(mountSelector, url){
+        const mount = document.querySelector(mountSelector);
+        if(!mount) return;
+        const r = await fetch(url, { cache: 'no-store' });
+        if(!r.ok) throw new Error('Kon partial niet laden');
+        mount.innerHTML = await r.text();
+      }
+
+      let lastFetch = null;
+      let dlgDetail = null;
+
+      // Bind handlers that rely on the dialog AFTER partial load
+      function bindVehicleDetailHandlers(){
+        const kvSummary = document.getElementById('vdSummary');
+        const kbBasis = document.getElementById('vdBasis');
+        const bfWrap = document.getElementById('vdBrandstoffen');
+        const klWrap = document.getElementById('vdKleuren');
+        const carWrap = document.getElementById('vdCarrosserie');
+        const asWrap = document.getElementById('vdAssen');
+
+        window.renderVehicleDetail = function(data){
+          if(!data) return;
+          const { summary: s, details: d } = data;
+
+          kvSummary.innerHTML='';
+          const sumPairs = {
+            'Kenteken': s.kenteken,
+            'Merk': s.merk,
+            'Type': s.handelsbenaming,
+            'Voertuigsoort': s.voertuigsoort ?? '',
+            'Eerste toelating': s.datum_eerste_toelating ?? '',
+            'APK vervaldatum': s.apk_vervaldatum ?? '',
+            'Kleur': s.kleur ?? '',
+            'Brandstof (hoofdzakelijk)': s.brandstof ?? '',
+            'Zitplaatsen': s.zitplaatsen ?? '',
+            'Deuren': s.deuren ?? '',
+            'Massa rijklaar (kg)': s.massa_rijklaar_kg ?? '',
+          };
+          for (const [k,v] of Object.entries(sumPairs)){
+            const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
+            const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
+            kvSummary.append(kEl,vEl);
+          }
+
+          const b = d?.basis || {};
+          kbBasis.innerHTML='';
+          const basisPairs = {
+            'Inrichting': b.inrichting,
+            'Catalogusprijs (€)': b.catalogusprijs,
+            'Cilinders': b.aantal_cilinders ?? b.cilinders,
+            'Cilinderinhoud (cc)': b.cilinderinhoud_cc,
+            'Lengte (cm)': b.lengte_cm, 'Breedte (cm)': b.breedte_cm, 'Hoogte (cm)': b.hoogte_cm,
+            'Wielbasis (cm)': b.wielbasis_cm, 'EU categorie': b.eu_voertuigcategorie,
+            'Type': b.type, 'Variant': b.variant, 'Uitvoering': b.uitvoering,
+            'WAM verzekerd': b.wam_verzekerd, 'Taxi': b.taxi_indicator,
+            'Terugroepactie': b.openstaande_terugroepactie_indicator
+          };
+          for (const [k,v] of Object.entries(basisPairs)){
+            const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
+            const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
+            kbBasis.append(kEl,vEl);
+          }
+
+          bfWrap.innerHTML='';
+          (d?.brandstoffen || []).forEach(f=>{
+            const line = document.createElement('div');
+            line.className='text-sm';
+            line.textContent = `${f.omschrijving ?? '—'} · CO₂ ${f.co2_gecombineerd_g_km ?? '—'} g/km · Vermogen ${f.nettomaximumvermogen_kw ?? '—'} kW`;
+            bfWrap.append(line);
+          });
+
+          klWrap.innerHTML='';
+          (d?.kleuren || []).forEach(k=>{
+            const line = document.createElement('div');
+            line.className='text-sm';
+            line.textContent = [k.eerste_kleur, k.tweede_kleur].filter(Boolean).join(' / ') || '—';
+            klWrap.append(line);
+          });
+
+          carWrap.innerHTML='';
+          (d?.carrosserie || []).forEach(c=>{
+            const line = document.createElement('div'); line.className='text-sm';
+            line.textContent = c.carrosserietype_omschrijving || '—';
+            carWrap.append(line);
+          });
+
+          asWrap.innerHTML='';
+          (d?.assen || []).forEach(a=>{
+            const line = document.createElement('div'); line.className='text-sm';
+            line.textContent = `As ${a.asnummer ?? ''} · Wielbasis ${a.wielbasis ?? '—'} cm · Technische max aslast ${a.technische_max_aslast ?? '—'} kg`;
+            asWrap.append(line);
+          });
+        };
+
+        dlgDetail = document.getElementById('vehicleDetail');
+      }
+
+      // ---- DOM bindings for main UI ----
       const elKenteken = document.getElementById('kenteken');
       const elKmstand  = document.getElementById('kmstand');
       const elFetch    = document.getElementById('fetchRDW');
@@ -226,9 +279,6 @@
       const elKV       = document.getElementById('rdwKV');
       const elOpenVd   = document.getElementById('openVehicleDetail');
       const elSearch   = document.getElementById('search');
-      const dlgDetail  = document.getElementById('vehicleDetail');
-
-      let lastFetch = null;
 
       elFetch?.addEventListener('click', async ()=>{
         const kenteken = elKenteken.value.trim();
@@ -259,77 +309,8 @@
 
       elOpenVd?.addEventListener('click', ()=>{
         if(!lastFetch){ toast('Eerst RDW-gegevens ophalen','error'); return; }
-        const { summary: s, details: d } = lastFetch;
-
-        const kv = document.getElementById('vdSummary'); kv.innerHTML='';
-        const sumPairs = {
-          'Kenteken': s.kenteken,
-          'Merk': s.merk,
-          'Type': s.handelsbenaming,
-          'Voertuigsoort': s.voertuigsoort ?? '',
-          'Eerste toelating': s.datum_eerste_toelating ?? '',
-          'APK vervaldatum': s.apk_vervaldatum ?? '',
-          'Kleur': s.kleur ?? '',
-          'Brandstof (hoofdzakelijk)': s.brandstof ?? '',
-          'Zitplaatsen': s.zitplaatsen ?? '',
-          'Deuren': s.deuren ?? '',
-          'Massa rijklaar (kg)': s.massa_rijklaar_kg ?? '',
-        };
-        for (const [k,v] of Object.entries(sumPairs)){
-          const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
-          const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
-          kv.append(kEl,vEl);
-        }
-
-        const b = d?.basis || {};
-        const kb = document.getElementById('vdBasis'); kb.innerHTML='';
-        const basisPairs = {
-          'Inrichting': b.inrichting,
-          'Catalogusprijs (€)': b.catalogusprijs,
-          'Cilinders': b.aantal_cilinders ?? b.cilinders,
-          'Cilinderinhoud (cc)': b.cilinderinhoud_cc,
-          'Lengte (cm)': b.lengte_cm, 'Breedte (cm)': b.breedte_cm, 'Hoogte (cm)': b.hoogte_cm,
-          'Wielbasis (cm)': b.wielbasis_cm, 'EU categorie': b.eu_voertuigcategorie,
-          'Type': b.type, 'Variant': b.variant, 'Uitvoering': b.uitvoering,
-          'WAM verzekerd': b.wam_verzekerd, 'Taxi': b.taxi_indicator,
-          'Terugroepactie': b.openstaande_terugroepactie_indicator
-        };
-        for (const [k,v] of Object.entries(basisPairs)){
-          const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
-          const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
-          kb.append(kEl,vEl);
-        }
-
-        const bf = document.getElementById('vdBrandstoffen'); bf.innerHTML='';
-        (d?.brandstoffen || []).forEach(f=>{
-          const line = document.createElement('div');
-          line.className='text-sm';
-          line.textContent = `${f.omschrijving ?? '—'} · CO₂ ${f.co2_gecombineerd_g_km ?? '—'} g/km · Vermogen ${f.nettomaximumvermogen_kw ?? '—'} kW`;
-          bf.append(line);
-        });
-
-        const kl = document.getElementById('vdKleuren'); kl.innerHTML='';
-        (d?.kleuren || []).forEach(k=>{
-          const line = document.createElement('div');
-          line.className='text-sm';
-          line.textContent = [k.eerste_kleur, k.tweede_kleur].filter(Boolean).join(' / ') || '—';
-          kl.append(line);
-        });
-
-        const car = document.getElementById('vdCarrosserie'); car.innerHTML='';
-        (d?.carrosserie || []).forEach(c=>{
-          const line = document.createElement('div'); line.className='text-sm';
-          line.textContent = c.carrosserietype_omschrijving || '—';
-          car.append(line);
-        });
-
-        const as = document.getElementById('vdAssen'); as.innerHTML='';
-        (d?.assen || []).forEach(a=>{
-          const line = document.createElement('div'); line.className='text-sm';
-          line.textContent = `As ${a.asnummer ?? ''} · Wielbasis ${a.wielbasis ?? '—'} cm · Technische max aslast ${a.technische_max_aslast ?? '—'} kg`;
-          as.append(line);
-        });
-
+        if(!dlgDetail){ toast('Voertuigdetail wordt geladen…','warn'); return; }
+        window.renderVehicleDetail(lastFetch);
         dlgDetail.showModal();
       });
 
@@ -339,6 +320,17 @@
           row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
         });
       });
+
+      // Load the partial and bind handlers
+      (async()=>{
+        try{
+          await loadPartial('#vehicleDetailMount','/partials/vehicle-detail.html');
+          bindVehicleDetailHandlers();
+        }catch(e){
+          console.error(e);
+          toast('Kon voertuigkaart niet laden','error');
+        }
+      })();
     </script>
   </body>
 </html>
