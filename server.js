@@ -8,6 +8,21 @@ const app = express();
 // --- Static (optional) ---
 app.use(express.static(process.cwd(), { extensions: ['html'] }));
 
+// Serve client-side env
+app.get('/env.js', (req, res) => {
+  res.type('application/javascript');
+  res.setHeader('Cache-Control', 'no-store');
+
+  const url  = process.env.SUPABASE_URL || '';
+  const anon = process.env.SUPABASE_ANON_KEY || '';
+
+  // Only anon key is sent to browser
+  res.end(
+    `window.__SUPABASE_URL__=${JSON.stringify(url)};
+     window.__SUPABASE_ANON_KEY__=${JSON.stringify(anon)};`
+  );
+});
+
 // --- CORS for local dev; prod is same-origin ---
 const allowed = new Set([
   'http://127.0.0.1:3001','http://localhost:3001',
