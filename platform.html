@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ProDriveNet</title>
+    <title>E-Noer Auto Platform</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
@@ -34,12 +34,12 @@
     </style>
   </head>
 
-  <body class="min-h-screen bg-[var(--bg)] text-[var(--ink)]" data-build="platform-2025-09-27-16-05">
+  <body class="min-h-screen bg-[var(--bg)] text-[var(--ink)]" data-build="platform-2025-09-27-16-18">
     <div class="flex min-h-screen">
       <aside class="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col">
         <div class="h-14 flex items-center gap-2 px-4 border-b">
           <i class="fa-solid fa-circle text-[var(--brand)]"></i>
-          <span class="font-extrabold tracking-tight">ProDriveNet</span>
+          <span class="font-extrabold tracking-tight">E-Noer Auto</span>
         </div>
         <nav class="flex-1 overflow-auto scroll-slim py-3">
           <div class="px-3 text-xs uppercase text-gray-500 mb-2">Menu</div>
@@ -112,7 +112,7 @@
           </div>
         </section>
 
-        <!-- Example list below (unchanged) -->
+        <!-- Example list below (unchanged demo) -->
         <section class="px-4 pb-8">
           <div class="flex items-center justify-between mb-2">
             <div class="text-sm text-gray-500">Overzicht</div>
@@ -142,7 +142,7 @@
       </main>
     </div>
 
-    <!-- Partial mounts (outside main so dialogs aren’t clipped) -->
+    <!-- Partial mounts -->
     <div id="vehicleDetailMount"></div>
     <div id="salesOverviewMount" class="px-4 pb-12"></div>
     <div id="salesEditMount"></div>
@@ -201,7 +201,7 @@
         return false;
       }
 
-      // ---------- VEHICLE DETAIL (existing) ----------
+      // ---------- VEHICLE DETAIL (fullscreen) ----------
       let dlgDetail = null;
       let vehicleDetailReady;
       (async()=>{
@@ -283,7 +283,6 @@
         const ok = await loadInto('#salesOverviewMount', ['/partials/sales-overview.html','partials/sales-overview.html']);
         if(!ok) return;
         renderSalesOverview();
-        // scroll to it (nice UX)
         document.querySelector('#salesOverviewMount')?.scrollIntoView({behavior:'smooth', block:'start'});
       }
 
@@ -309,8 +308,6 @@
             </div>`;
           list.append(row);
         });
-
-        // bind edit
         list.querySelectorAll('button[data-act="edit"]').forEach(btn=>{
           btn.addEventListener('click', ()=>{
             const id = btn.getAttribute('data-id');
@@ -319,16 +316,94 @@
           });
         });
       }
-
       document.getElementById('navSalesOverview')?.addEventListener('click', showSalesOverview);
 
-      // ---------- SALES EDIT (add/edit form + upload) ----------
+      // ---------- SALES EDIT (now renders full tech sections) ----------
       let dlgSalesEdit = null;
+
+      function renderSalesTechnical(data){
+        const { summary: s, details: d } = data || {};
+        const seSummary = document.getElementById('seSummary');
+        const seBasis = document.getElementById('seBasis');
+        const seBrand = document.getElementById('seBrandstoffen');
+        const seKleur = document.getElementById('seKleuren');
+        const seCarr  = document.getElementById('seCarrosserie');
+        const seAssen = document.getElementById('seAssen');
+
+        if(seSummary){
+          seSummary.innerHTML='';
+          const sumPairs = {
+            'Kenteken': s?.kenteken, 'Merk': s?.merk, 'Type': s?.handelsbenaming,
+            'Voertuigsoort': s?.voertuigsoort ?? '', 'Eerste toelating': s?.datum_eerste_toelating ?? '',
+            'APK vervaldatum': s?.apk_vervaldatum ?? '', 'Kleur': s?.kleur ?? '',
+            'Brandstof (hoofdzakelijk)': s?.brandstof ?? '', 'Zitplaatsen': s?.zitplaatsen ?? '',
+            'Deuren': s?.deuren ?? '', 'Massa rijklaar (kg)': s?.massa_rijklaar_kg ?? ''
+          };
+          for (const [k,v] of Object.entries(sumPairs)){
+            const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
+            const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
+            seSummary.append(kEl,vEl);
+          }
+        }
+
+        if(seBasis){
+          const b = d?.basis || {};
+          seBasis.innerHTML='';
+          const basisPairs = {
+            'Inrichting': b.inrichting, 'Catalogusprijs (€)': b.catalogusprijs,
+            'Cilinders': b.aantal_cilinders ?? b.cilinders, 'Cilinderinhoud (cc)': b.cilinderinhoud_cc,
+            'Lengte (cm)': b.lengte_cm, 'Breedte (cm)': b.breedte_cm, 'Hoogte (cm)': b.hoogte_cm,
+            'Wielbasis (cm)': b.wielbasis_cm, 'EU categorie': b.eu_voertuigcategorie,
+            'Type': b.type, 'Variant': b.variant, 'Uitvoering': b.uitvoering,
+            'WAM verzekerd': b.wam_verzekerd, 'Taxi': b.taxi_indicator,
+            'Terugroepactie': b.openstaande_terugroepactie_indicator
+          };
+          for (const [k,v] of Object.entries(basisPairs)){
+            const kEl=document.createElement('div');kEl.className='text-gray-500';kEl.textContent=k;
+            const vEl=document.createElement('div');vEl.textContent=(v ?? '-')+'';
+            seBasis.append(kEl,vEl);
+          }
+        }
+
+        if(seBrand){
+          seBrand.innerHTML='';
+          (d?.brandstoffen || []).forEach(f=>{
+            const line = document.createElement('div'); line.className='text-sm';
+            line.textContent = `${f.omschrijving ?? '—'} · CO₂ ${f.co2_gecombineerd_g_km ?? '—'} g/km · Vermogen ${f.nettomaximumvermogen_kw ?? '—'} kW`;
+            seBrand.append(line);
+          });
+        }
+        if(seKleur){
+          seKleur.innerHTML='';
+          (d?.kleuren || []).forEach(k=>{
+            const line = document.createElement('div'); line.className='text-sm';
+            line.textContent = [k.eerste_kleur, k.tweede_kleur].filter(Boolean).join(' / ') || '—';
+            seKleur.append(line);
+          });
+        }
+        if(seCarr){
+          seCarr.innerHTML='';
+          (d?.carrosserie || []).forEach(c=>{
+            const line = document.createElement('div'); line.className='text-sm';
+            line.textContent = c.carrosserietype_omschrijving || '—';
+            seCarr.append(line);
+          });
+        }
+        if(seAssen){
+          seAssen.innerHTML='';
+          (d?.assen || []).forEach(a=>{
+            const line = document.createElement('div'); line.className='text-sm';
+            line.textContent = `As ${a.asnummer ?? ''} · Wielbasis ${a.wielbasis ?? '—'} cm · Technische max aslast ${a.technische_max_aslast ?? '—'} kg`;
+            seAssen.append(line);
+          });
+        }
+      }
 
       async function openSalesEdit(prefill){
         const ok = await loadInto('#salesEditMount', ['/partials/sales-edit.html','partials/sales-edit.html']);
         if(!ok) return;
         dlgSalesEdit = document.getElementById('salesEdit');
+
         const f = document.getElementById('salesForm');
         const img = document.getElementById('salesPhotoPreview');
         const file = document.getElementById('salesPhoto');
@@ -336,7 +411,10 @@
         const price = document.getElementById('salesPrice');
         const desc  = document.getElementById('salesDesc');
 
-        // prefill
+        // RDW data -> render full technical sections
+        renderSalesTechnical(prefill);
+
+        // Prefill verkoopvelden
         const s = prefill?.summary || prefill || {};
         title.value = prefill?.title || `${s.merk ?? ''} ${s.handelsbenaming ?? ''}`.trim();
         price.value = prefill?.price || '';

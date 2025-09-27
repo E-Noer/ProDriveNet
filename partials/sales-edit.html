@@ -1,17 +1,21 @@
-<dialog id="salesEdit" class="w-[min(1100px,96vw)] max-h-[90vh] rounded-2xl border p-0 overflow-hidden">
+<dialog id="salesEdit" class="w-[min(1200px,96vw)] max-h-[92vh] rounded-2xl border p-0 overflow-hidden">
   <form id="salesForm" method="dialog" class="bg-white">
+    <!-- Header -->
     <div class="h-12 flex items-center justify-between px-4 border-b">
       <div class="font-semibold">Verkoop — Details</div>
       <button class="btn btn-icon" value="cancel" aria-label="Sluiten"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <div class="p-4 grid lg:grid-cols-2 gap-4 max-h-[70vh] overflow-auto">
+    <!-- Content -->
+    <div class="p-4 grid xl:grid-cols-2 gap-4 max-h-[76vh] overflow-auto">
+
+      <!-- LEFT: verkoopvelden + samenvatting -->
       <section class="card p-4">
-        <div class="text-sm text-gray-500 mb-2">Basis</div>
+        <div class="text-sm text-gray-500 mb-2">Verkoop</div>
         <div class="grid gap-3">
           <label class="grid gap-1">
             <span class="text-sm text-gray-500">Titel</span>
-            <input id="salesTitle" class="ring-focus px-3 py-2 border rounded-lg" placeholder="Bijv. Ford Fiesta 1.0 EcoBoost Titanium" />
+            <input id="salesTitle" class="ring-focus px-3 py-2 border rounded-lg" placeholder="Bijv. Ford Kuga 1.5 EcoBoost Titanium" />
           </label>
           <label class="grid gap-1">
             <span class="text-sm text-gray-500">Vraagprijs (€)</span>
@@ -22,20 +26,59 @@
             <textarea id="salesDesc" class="ring-focus px-3 py-2 border rounded-lg min-h-[120px]" placeholder="Opties, onderhoud, bijzonderheden…"></textarea>
           </label>
         </div>
-      </section>
 
-      <section class="card p-4">
-        <div class="text-sm text-gray-500 mb-2">Foto</div>
-        <div class="dropzone">
-          <label class="flex flex-col items-center gap-2 cursor-pointer">
-            <img id="salesPhotoPreview" class="max-w-full max-h-64 rounded-lg border" src="https://placehold.co/800x500?text=Foto" alt="Preview" />
-            <span class="btn"><i class="fa-solid fa-image"></i> Kies afbeelding</span>
-            <input id="salesPhoto" type="file" accept="image/*" class="hidden" />
-          </label>
+        <div class="mt-6">
+          <div class="text-sm text-gray-500 mb-2">Samenvatting</div>
+          <div class="kv" id="seSummary"></div>
         </div>
       </section>
+
+      <!-- RIGHT: foto + technische secties -->
+      <section class="grid gap-4">
+        <div class="card p-4">
+          <div class="text-sm text-gray-500 mb-2">Foto</div>
+          <div class="dropzone">
+            <label class="flex flex-col items-center gap-2 cursor-pointer">
+              <img id="salesPhotoPreview" class="max-w-full max-h-64 rounded-lg border" src="https://placehold.co/800x500?text=Foto" alt="Preview" />
+              <span class="btn"><i class="fa-solid fa-image"></i> Kies afbeelding</span>
+              <input id="salesPhoto" type="file" accept="image/*" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <div class="card p-4">
+          <div class="font-semibold mb-2">Technische details</div>
+
+          <div class="mb-4">
+            <div class="text-sm text-gray-500 mb-1">Basis</div>
+            <div class="kv" id="seBasis"></div>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-sm text-gray-500 mb-1">Brandstoffen</div>
+            <div id="seBrandstoffen" class="space-y-1"></div>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-sm text-gray-500 mb-1">Kleuren</div>
+            <div id="seKleuren" class="space-y-1"></div>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-sm text-gray-500 mb-1">Carrosserie</div>
+            <div id="seCarrosserie" class="space-y-1"></div>
+          </div>
+
+          <div>
+            <div class="text-sm text-gray-500 mb-1">Assen</div>
+            <div id="seAssen" class="space-y-1"></div>
+          </div>
+        </div>
+      </section>
+
     </div>
 
+    <!-- Footer -->
     <div class="p-4 border-t flex justify-end gap-2">
       <button class="btn" value="cancel">Annuleren</button>
       <button class="btn btn-primary" value="default"><i class="fa-solid fa-floppy-disk"></i> Opslaan</button>
