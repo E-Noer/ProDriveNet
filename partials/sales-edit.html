@@ -1,0 +1,44 @@
+<dialog id="salesEdit" class="w-[min(1100px,96vw)] max-h-[90vh] rounded-2xl border p-0 overflow-hidden">
+  <form id="salesForm" method="dialog" class="bg-white">
+    <div class="h-12 flex items-center justify-between px-4 border-b">
+      <div class="font-semibold">Verkoop — Details</div>
+      <button class="btn btn-icon" value="cancel" aria-label="Sluiten"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="p-4 grid lg:grid-cols-2 gap-4 max-h-[70vh] overflow-auto">
+      <section class="card p-4">
+        <div class="text-sm text-gray-500 mb-2">Basis</div>
+        <div class="grid gap-3">
+          <label class="grid gap-1">
+            <span class="text-sm text-gray-500">Titel</span>
+            <input id="salesTitle" class="ring-focus px-3 py-2 border rounded-lg" placeholder="Bijv. Ford Fiesta 1.0 EcoBoost Titanium" />
+          </label>
+          <label class="grid gap-1">
+            <span class="text-sm text-gray-500">Vraagprijs (€)</span>
+            <input id="salesPrice" class="ring-focus px-3 py-2 border rounded-lg" inputmode="decimal" placeholder="12950" />
+          </label>
+          <label class="grid gap-1">
+            <span class="text-sm text-gray-500">Omschrijving</span>
+            <textarea id="salesDesc" class="ring-focus px-3 py-2 border rounded-lg min-h-[120px]" placeholder="Opties, onderhoud, bijzonderheden…"></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section class="card p-4">
+        <div class="text-sm text-gray-500 mb-2">Foto</div>
+        <div class="dropzone">
+          <label class="flex flex-col items-center gap-2 cursor-pointer">
+            <img id="salesPhotoPreview" class="max-w-full max-h-64 rounded-lg border" src="https://placehold.co/800x500?text=Foto" alt="Preview" />
+            <span class="btn"><i class="fa-solid fa-image"></i> Kies afbeelding</span>
+            <input id="salesPhoto" type="file" accept="image/*" class="hidden" />
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <div class="p-4 border-t flex justify-end gap-2">
+      <button class="btn" value="cancel">Annuleren</button>
+      <button class="btn btn-primary" value="default"><i class="fa-solid fa-floppy-disk"></i> Opslaan</button>
+    </div>
+  </form>
+</dialog>

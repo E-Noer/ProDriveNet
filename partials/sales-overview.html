@@ -1,0 +1,16 @@
+<section class="px-0">
+  <div class="card p-4">
+    <div class="flex items-center justify-between">
+      <div class="font-semibold">Verkoop — Overzicht</div>
+      <button id="salesRefresh" class="btn"><i class="fa-solid fa-rotate-right"></i> Vernieuwen</button>
+    </div>
+    <div class="mt-3 grid-cars" id="salesList"></div>
+  </div>
+</section>
+<script>
+  // allow manual refresh in case state changed elsewhere
+  document.getElementById('salesRefresh')?.addEventListener('click', ()=> {
+    if (window.renderSalesOverview) window.renderSalesOverview();
+    else window.dispatchEvent(new Event('sales:render'));
+  });
+</script>
