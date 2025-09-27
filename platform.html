@@ -31,13 +31,12 @@
       .kv{display:grid;grid-template-columns:140px 1fr;gap:.35rem .75rem;font-size:.9rem}
       .tag{display:inline-flex;align-items:center;gap:.35rem;background:#f1f5f9;border:1px solid #e5e7eb;border-radius:.55rem;padding:.25rem .55rem;font-size:.78rem}
       .table-like{display:grid;grid-template-columns:52px 1.1fr auto auto;gap:.5rem;align-items:center}
-      .table-head{color:var(--muted);font-size:.78rem}
       .veh-row{background:var(--panel);border:1px solid #e5e7eb;border-radius:.75rem;padding:.65rem .75rem}
       pre.json {max-height:320px;overflow:auto;background:#0b1220;color:#dff1ff;padding:1rem;border-radius:.5rem;font-size:12px}
     </style>
   </head>
 
-  <body class="min-h-screen bg-[var(--bg)] text-[var(--ink)]" data-build="platform-2025-09-27-15-00">
+  <body class="min-h-screen bg-[var(--bg)] text-[var(--ink)]" data-build="platform-2025-09-27-15-55">
     <div class="flex min-h-screen">
       <aside class="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col">
         <div class="h-14 flex items-center gap-2 px-4 border-b">
@@ -144,7 +143,7 @@
       </main>
     </div>
 
-    <!-- Partial mount point -->
+    <!-- Partial mount point (outside main so dialog isn't clipped) -->
     <div id="vehicleDetailMount"></div>
 
     <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg border bg-white shadow hidden"></div>
@@ -156,7 +155,7 @@
         el.classList.remove('hidden');
         el.style.borderColor = kind==='error' ? 'var(--danger)' : kind==='warn' ? 'var(--warning)' : '#e5e7eb';
         clearTimeout(el._t);
-        el._t = setTimeout(()=> el.classList.add('hidden'), 2500);
+        el._t = setTimeout(()=> el.classList.add('hidden'), 2200);
       }
 
       const PROD_HOSTS = new Set(['prodrivenet.com','www.prodrivenet.com','e-noer.nl','www.e-noer.nl']);
@@ -173,19 +172,35 @@
         return res.json();
       }
 
-      // ---- Partial loader ----
-      async function loadPartial(mountSelector, url){
-        const mount = document.querySelector(mountSelector);
+      // ---------- Robust partial loader with readiness promise ----------
+      let dlgDetail = null;
+      let partialResolve;
+      const partialReady = new Promise(r => partialResolve = r);
+
+      async function loadVehicleDetailPartial(){
+        const mount = document.querySelector('#vehicleDetailMount');
         if(!mount) return;
-        const r = await fetch(url, { cache: 'no-store' });
-        if(!r.ok) throw new Error('Kon partial niet laden');
-        mount.innerHTML = await r.text();
+
+        const tryUrls = ['/partials/vehicle-detail.html','partials/vehicle-detail.html'];
+        let lastErr;
+        for (const url of tryUrls){
+          try{
+            const r = await fetch(url, { cache: 'no-store' });
+            if(!r.ok) throw new Error(`HTTP ${r.status} for ${url}`);
+            mount.innerHTML = await r.text();
+            // hook up DOM refs and renderer now that it's in the page
+            bindVehicleDetailHandlers();
+            partialResolve(true);
+            return;
+          }catch(e){
+            lastErr = e;
+          }
+        }
+        console.error('Kon voertuig-detail partial niet laden:', lastErr);
+        toast('Kon voertuigkaart niet laden','error');
+        partialResolve(false);
       }
 
-      let lastFetch = null;
-      let dlgDetail = null;
-
-      // Bind handlers that rely on the dialog AFTER partial load
       function bindVehicleDetailHandlers(){
         const kvSummary = document.getElementById('vdSummary');
         const kbBasis = document.getElementById('vdBasis');
@@ -271,7 +286,7 @@
         dlgDetail = document.getElementById('vehicleDetail');
       }
 
-      // ---- DOM bindings for main UI ----
+      // ---------- Main UI ----------
       const elKenteken = document.getElementById('kenteken');
       const elKmstand  = document.getElementById('kmstand');
       const elFetch    = document.getElementById('fetchRDW');
@@ -279,6 +294,8 @@
       const elKV       = document.getElementById('rdwKV');
       const elOpenVd   = document.getElementById('openVehicleDetail');
       const elSearch   = document.getElementById('search');
+
+      let lastFetch = null;
 
       elFetch?.addEventListener('click', async ()=>{
         const kenteken = elKenteken.value.trim();
@@ -307,9 +324,14 @@
         }
       });
 
-      elOpenVd?.addEventListener('click', ()=>{
+      elOpenVd?.addEventListener('click', async ()=>{
         if(!lastFetch){ toast('Eerst RDW-gegevens ophalen','error'); return; }
-        if(!dlgDetail){ toast('Voertuigdetail wordt geladen…','warn'); return; }
+        // Wait for partial if still loading
+        if(!dlgDetail){
+          toast('Voertuigdetail wordt geladen…','warn');
+          const ok = await partialReady;
+          if(!ok){ return; }
+        }
         window.renderVehicleDetail(lastFetch);
         dlgDetail.showModal();
       });
@@ -321,16 +343,8 @@
         });
       });
 
-      // Load the partial and bind handlers
-      (async()=>{
-        try{
-          await loadPartial('#vehicleDetailMount','/partials/vehicle-detail.html');
-          bindVehicleDetailHandlers();
-        }catch(e){
-          console.error(e);
-          toast('Kon voertuigkaart niet laden','error');
-        }
-      })();
+      // Kick off partial load ASAP
+      loadVehicleDetailPartial();
     </script>
   </body>
 </html>
