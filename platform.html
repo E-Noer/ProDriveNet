@@ -5,8 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>E-Noer Auto Platform</title>
 
+    <!-- Tailwind + Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
+
+    <!-- 1) Expose Supabase URL & ANON key to the browser -->
+    <script src="/env.js"></script>
+
+    <!-- 2) Auth guard: redirect to index when not logged in -->
+    <script type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+      // If /env.js didn't load, avoid a ReferenceError
+      if (window.__SUPABASE_URL__ && window.__SUPABASE_ANON_KEY__) {
+        const s = createClient(window.__SUPABASE_URL__, window.__SUPABASE_ANON_KEY__);
+        const { data: { session } } = await s.auth.getSession();
+        if (!session) window.location.replace('/index.html');
+      } else {
+        // Fallback: if env missing, send to landing (prevents broken page)
+        window.location.replace('/index.html');
+      }
+    </script>
+
     <style>
       :root{
         --bg:#f5f6f8; --panel:#ffffff; --muted:#6b7280; --ink:#0f172a;

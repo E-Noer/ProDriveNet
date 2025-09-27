@@ -7,11 +7,12 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
-  <!-- Exposes window.__SUPABASE_URL__ and window.__SUPABASE_ANON_KEY__ -->
+  <!-- Publieke env naar de browser (URL + ANON key) -->
   <script src="/env.js"></script>
   <style>
     .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.6rem;padding:.55rem .85rem;border:1px solid #e5e7eb;background:#fff}
     .btn-primary{background:#ff5a1f;border-color:#ff5a1f;color:#fff}
+    .btn-ghost{background:#fff}
     .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);padding:.6rem .9rem;border:1px solid #e5e7eb;background:#fff;border-radius:.6rem;box-shadow:0 6px 24px rgba(0,0,0,.08);display:none}
     .toast.show{display:block}
   </style>
@@ -46,7 +47,7 @@
         <ul class="mt-8 space-y-2 text-slate-600">
           <li>• RDW-koppeling en voertuigkaart</li>
           <li>• Verkoopoverzicht met fotobeheer</li>
-          <li>• Supabase-auth en data</li>
+          <li>• Supabase e-mail/wachtwoord-auth</li>
         </ul>
       </section>
 
@@ -78,7 +79,7 @@
   <script type="module">
     const toast = (msg)=>{ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); };
 
-    // --- Try to show "Naar platform" if session exists (non-blocking)
+    // Toon "Naar platform" als er al een sessie is
     (async()=>{
       try{
         const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
@@ -86,67 +87,98 @@
         const s = createClient(window.__SUPABASE_URL__, window.__SUPABASE_ANON_KEY__);
         const { data:{ session } } = await s.auth.getSession();
         document.getElementById('btnGoPlatform')?.classList.toggle('hidden', !session);
-      }catch{ /* ignore */ }
+      }catch{}
     })();
 
+    // Auth modal loader
     async function ensureAuthModalLoaded(){
       if (document.getElementById('authDialog')) return true;
       const mount = document.getElementById('authMount');
       const paths = ['/partials/auth-modal.html','partials/auth-modal.html'];
-      let ok=false,lastErr=null;
       for (const p of paths){
-        try{
-          const r = await fetch(p, { cache:'no-store' });
-          if(!r.ok) throw new Error(`HTTP ${r.status}`);
-          mount.innerHTML = await r.text();
-          ok=true; break;
-        }catch(e){ lastErr=e; }
+        const r = await fetch(p,{cache:'no-store'});
+        if(r.ok){ mount.innerHTML = await r.text(); bindAuthHandlers(); return true; }
       }
-      if(!ok){
-        console.error('Auth partial failed to load', lastErr);
-        toast('Kon inlogvenster niet laden');
-        return false;
-      }
-      bindAuthHandlers();
-      return true;
+      toast('Kon inlogvenster niet laden'); return false;
     }
 
     function bindAuthHandlers(){
       const dlg = document.getElementById('authDialog');
+      const tabIn = document.getElementById('tabSignIn');
+      const tabUp = document.getElementById('tabSignUp');
+      const formIn = document.getElementById('formSignIn');
+      const formUp = document.getElementById('formSignUp');
+      const forgot = document.getElementById('linkForgot');
+      const msg = (t)=>{ const el=document.getElementById('authMsg'); if(el) el.textContent=t||''; };
+
       document.getElementById('authClose')?.addEventListener('click', ()=> dlg.close());
 
-      // Wire Supabase if env is present
+      // Supabase client
+      let supabase = null;
       (async()=>{
         try{
           const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
           if(!window.__SUPABASE_URL__ || !window.__SUPABASE_ANON_KEY__){
-            document.getElementById('authMsg').textContent = 'Supabase env ontbreekt (env.js).';
-            return;
+            msg('Supabase env ontbreekt (/env.js).'); return;
           }
-          const supabase = createClient(window.__SUPABASE_URL__, window.__SUPABASE_ANON_KEY__);
-
-          const providers = ['google','github','apple'];
-          providers.forEach(p=>{
-            document.getElementById('btn-'+p)?.addEventListener('click', async ()=>{
-              const redirectTo = `${location.origin}/platform.html`;
-              const { error } = await supabase.auth.signInWithOAuth({ provider:p, options:{ redirectTo } });
-              if(error) document.getElementById('authMsg').textContent = error.message;
-            });
-          });
-
-          document.getElementById('emailForm')?.addEventListener('submit', async (e)=>{
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            const { error } = await supabase.auth.signInWithOtp({ email, options:{ emailRedirectTo:`${location.origin}/platform.html` }});
-            document.getElementById('authMsg').textContent = error ? error.message : 'Check je mail voor de login link.';
-          });
-        }catch(e){
-          console.error(e);
-          document.getElementById('authMsg').textContent = 'Kon Supabase niet initialiseren.';
-        }
+          supabase = createClient(window.__SUPABASE_URL__, window.__SUPABASE_ANON_KEY__);
+        }catch{ msg('Kon Supabase niet initialiseren.'); }
       })();
 
-      // Expose opener
+      // Tabs
+      function select(tab){ 
+        document.querySelectorAll('[role="tab"]').forEach(b=>b.setAttribute('aria-selected','false'));
+        tab.setAttribute('aria-selected','true');
+        const target = tab.dataset.target;
+        document.querySelectorAll('[role="tabpanel"]').forEach(p=> p.classList.toggle('hidden', '#'+p.id !== target));
+        msg('');
+      }
+      tabIn?.addEventListener('click', ()=> select(tabIn));
+      tabUp?.addEventListener('click', ()=> select(tabUp));
+      // default tab: Sign In
+      select(tabIn);
+
+      // Inloggen
+      formIn?.addEventListener('submit', async (e)=>{
+        e.preventDefault(); msg('');
+        if(!supabase){ msg('Supabase niet klaar.'); return; }
+        const email = document.getElementById('inEmail').value.trim();
+        const password = document.getElementById('inPassword').value;
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if(error){ msg(error.message); return; }
+        window.location.href = '/platform.html';
+      });
+
+      // Registreren
+      formUp?.addEventListener('submit', async (e)=>{
+        e.preventDefault(); msg('');
+        if(!supabase){ msg('Supabase niet klaar.'); return; }
+        const email = document.getElementById('upEmail').value.trim();
+        const password = document.getElementById('upPassword').value;
+        const fullName = document.getElementById('upName').value.trim() || email;
+        const { error } = await supabase.auth.signUp({
+          email, password,
+          options: {
+            data: { full_name: fullName },
+            emailRedirectTo: `${location.origin}/platform.html`
+          }
+        });
+        if(error){ msg(error.message); return; }
+        msg('Registratie gelukt. Check je e-mail om te bevestigen.');
+      });
+
+      // Wachtwoord vergeten
+      forgot?.addEventListener('click', async (e)=>{
+        e.preventDefault(); msg('');
+        if(!supabase){ msg('Supabase niet klaar.'); return; }
+        const email = document.getElementById('inEmail').value.trim();
+        if(!email){ msg('Vul eerst je e-mail in.'); return; }
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${location.origin}/auth.html#reset`
+        });
+        msg(error ? error.message : 'Reset-link is verzonden.');
+      });
+
       window.__openAuth = ()=> dlg.showModal();
     }
 
@@ -159,7 +191,7 @@
     document.getElementById('btnOpenAuth')?.addEventListener('click', openAuth);
     document.getElementById('ctaAuth')?.addEventListener('click', openAuth);
 
-    // If user clicks "Start meteen" but isn’t logged in, open modal instead of navigating
+    // CTA -> open modal als niet ingelogd
     document.getElementById('ctaStart')?.addEventListener('click', async (e)=>{
       try{
         const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
