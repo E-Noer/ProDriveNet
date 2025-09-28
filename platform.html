@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer"/>
 
     <style>
+      /* Prevent iOS text inflation & focus zoom quirks */
+      html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
       :root{
         --bg:#f5f6f8; --panel:#ffffff; --muted:#6b7280; --ink:#0f172a;
         --brand:#1f8fff; --success:#16a34a; --ring:0 0 0 3px rgba(31,143,255,.2);
@@ -18,7 +20,9 @@
       .card{background:var(--panel);border:1px solid #e5e7eb;border-radius:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04)}
       .pill{border:1px solid #e5e7eb;border-radius:999px;padding:.35rem .6rem;font-size:.8rem}
       .ring-focus:focus{outline:none;box-shadow:var(--ring)}
-      .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.75rem;padding:.55rem .9rem;border:1px solid #e5e7eb;background:#fff}
+      /* Ensure controls are >=16px to avoid iOS page zoom on focus */
+      input, select, textarea, button{ font-size:16px; }
+      .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.75rem;padding:.55rem .9rem;border:1px solid #e5e7eb;background:#fff;line-height:1.1}
       .btn:hover{background:#fafafa}
       .btn-primary{background:linear-gradient(135deg,var(--brand),#4ab0ff);border-color:transparent;color:#fff}
       .btn-primary:hover{filter:brightness(.98)}
@@ -40,10 +44,14 @@
       .kv{display:grid;grid-template-columns:max(140px) 1fr;gap:.35rem .8rem;font-size:.9rem}
       .kv .k{color:#6b7280}
 
-      /* --- Mobile-only refinements --- */
+      /* Titles scale with viewport: keeps hierarchy but avoids overflow on phone */
+      .title-lg{font-weight:700;letter-spacing:-0.01em;font-size:clamp(1.125rem, 1.2vw + .9rem, 1.25rem);} /* Drawer header */
+      .section-title{font-size:clamp(1rem, .8vw + .8rem, 1.125rem);font-weight:600;}
+
+      /* --- Mobile refinements --- */
       @media (max-width:640px){
         body{padding-bottom:env(safe-area-inset-bottom);}
-        .card{border-color:#eef2f7;} /* lighter borders to reduce noise */
+        .card{border-color:#eef2f7;}
         header.card, .card.p-4{padding:0.75rem;}
         .drawer{height:100dvh;}
         .drawer [data-scroll]{max-height:calc(100dvh - 56px);overflow:auto;-webkit-overflow-scrolling:touch;}
@@ -87,11 +95,11 @@
           <div class="card p-3 sm:p-4 max-sm:border-slate-100">
             <div class="flex items-center justify-between gap-3 flex-wrap">
               <div class="flex items-center gap-3">
-                <div class="font-semibold">Voertuigen</div>
+                <div class="font-semibold section-title">Voertuigen</div>
                 <span class="pill" id="countBadge">0 items</span>
               </div>
               <div class="flex items-center gap-2 max-sm:w-full max-sm:justify-between">
-                <input id="search" placeholder="Zoek kenteken, merk, model…" class="ring-focus px-3 py-2 border rounded-lg w-64 max-sm:w-[58%] max-sm:text-[15px]"/>
+                <input id="search" placeholder="Zoek kenteken, merk, model…" class="ring-focus px-3 py-2 border rounded-lg w-64 max-sm:w-[58%]"/>
                 <button id="btnAddSale" class="btn btn-primary max-sm:w-[40%] max-sm:justify-center"><i class="fa-solid fa-plus"></i>Toevoegen</button>
               </div>
             </div>
@@ -99,7 +107,7 @@
 
           <div class="card p-3 sm:p-4 max-sm:border-slate-100">
             <div class="flex items-center gap-3 flex-wrap">
-              <div class="font-semibold">Auto toevoegen via RDW-koppeling</div>
+              <div class="font-semibold section-title">Auto toevoegen via RDW-koppeling</div>
               <div class="text-sm text-gray-500">Voer kenteken in (zonder streepjes) en haal voertuigdata op.</div>
             </div>
             <div class="mt-3 grid gap-3 sm:grid-cols-[280px,1fr,auto]">
@@ -152,12 +160,12 @@
     <!-- Sales Edit Drawer -->
     <div id="salesDrawer" class="drawer card p-0 overflow-auto">
       <div class="px-4 py-3 border-b flex items-center justify-between sticky top-0 bg-white">
-        <div class="font-semibold">Verkoop instellen</div>
+        <div class="font-semibold title-lg">Verkoop instellen</div>
         <button id="btnCloseSales" class="btn"><i class="fa-solid fa-xmark"></i>Sluiten</button>
       </div>
 
       <div class="p-4 grid xl:grid-cols-2 gap-4" data-scroll>
-        <!-- LEFT: verkoopvelden + samenvatting -->
+        <!-- LEFT -->
         <section class="card p-4 max-sm:p-3">
           <div class="text-sm text-gray-500 mb-2">Verkoop</div>
           <div class="grid gap-3">
@@ -219,7 +227,7 @@
           </div>
         </section>
 
-        <!-- RIGHT: preview + embedded full info -->
+        <!-- RIGHT -->
         <section class="grid gap-4">
           <div class="card p-4 max-sm:p-3">
             <div class="text-sm text-gray-500 mb-2">Voorbeeld</div>
@@ -266,7 +274,7 @@
     <!-- Full Vehicle Info Drawer -->
     <div id="infoDrawer" class="drawer card p-0 overflow-auto">
       <div class="px-4 py-3 border-b flex items-center justify-between sticky top-0 bg-white">
-        <div class="font-semibold">Volledige voertuiginfo</div>
+        <div class="font-semibold title-lg">Volledige voertuiginfo</div>
         <div class="flex items-center gap-2">
           <a id="linkVehicleDetail" class="btn" href="#" target="_blank"><i class="fa-regular fa-eye"></i>Open detailpagina</a>
           <button id="btnCloseInfo" class="btn"><i class="fa-solid fa-xmark"></i>Sluiten</button>
@@ -283,6 +291,7 @@
         </div>
 
         <div class="grid lg:grid-cols-2 gap-4">
+          <!-- (sections unchanged) -->
           <section class="card p-4">
             <div class="text-sm text-gray-500 mb-2">Registratie</div>
             <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
@@ -337,7 +346,7 @@
     <div id="infoMask" class="drawer-mask"></div>
 
     <script>
-      // --- Demo dataset ---
+      /* JS unchanged except small UX bits */
       const demoVehicles = [
         { id: rid(), kenteken:'SX348F', merk:'FORD', model:'FIESTA', bouwjaar:'2020', kleur:'ZWART',
           thumb:'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1200&auto=format&fit=crop', prijs:9450 },
@@ -347,7 +356,6 @@
           thumb:'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200&auto=format&fit=crop', prijs:19900 }
       ];
 
-      // Elements
       const elList = document.getElementById('vehicleList');
       const elCount = document.getElementById('countBadge');
       const elSearch = document.getElementById('search');
@@ -369,7 +377,6 @@
       const s_zit = document.getElementById('s_zit');
       const s_massa = document.getElementById('s_massa');
 
-      // Sales drawer
       const salesDrawer = document.getElementById('salesDrawer');
       const salesMask = document.getElementById('salesMask');
       const btnCloseSales = document.getElementById('btnCloseSales');
@@ -410,7 +417,6 @@
       const btnClearPhoto = document.getElementById('btnClearPhoto');
       const salesPhotoPreview = document.getElementById('salesPhotoPreview');
 
-      // Info drawer
       const infoDrawer = document.getElementById('infoDrawer');
       const infoMask = document.getElementById('infoMask');
       const btnCloseInfo = document.getElementById('btnCloseInfo');
@@ -434,7 +440,6 @@
 
       let lastFetch = null;
 
-      // Render list
       function renderList(items){
         elList.innerHTML = '';
         items.forEach(v=>{
@@ -444,7 +449,7 @@
             <img class="veh-thumb" alt="" src="${esc(v.thumb||'')}" />
             <div class="min-w-0">
               <div class="flex items-center gap-2">
-                <div class="font-medium truncate max-sm:text-[15px]">${esc(v.merk||'')} ${esc(v.model||'')}</div>
+                <div class="font-medium truncate">${esc(v.merk||'')} ${esc(v.model||'')}</div>
                 <span class="pill">${esc(v.kenteken||'—')}</span>
               </div>
               <div class="text-sm text-gray-500 truncate">
@@ -452,22 +457,20 @@
               </div>
             </div>
             <div class="flex items-center gap-2 max-sm:col-span-2 max-sm:justify-end max-sm:pt-2">
-              <button class="btn max-sm:px-2 max-sm:text-sm js-view" data-kenteken="${esc(v.kenteken)}"><i class="fa-regular fa-eye"></i><span class="max-[360px]:hidden sm:inline"> Bekijken</span></button>
-              <button class="btn max-sm:px-2 max-sm:text-sm"><i class="fa-regular fa-pen-to-square"></i><span class="max-[360px]:hidden sm:inline"> Bewerken</span></button>
+              <button class="btn max-sm:px-2 js-view" data-kenteken="${esc(v.kenteken)}"><i class="fa-regular fa-eye"></i><span class="max-[360px]:hidden sm:inline"> Bekijken</span></button>
+              <button class="btn max-sm:px-2"><i class="fa-regular fa-pen-to-square"></i><span class="max-[360px]:hidden sm:inline"> Bewerken</span></button>
             </div>`;
           elList.appendChild(row);
         });
         elCount.textContent = `${items.length} item${items.length===1?'':'s'}`;
       }
 
-      // Helpers
       function fmtPrice(n){ if(n==null||isNaN(n)) return '—'; return new Intl.NumberFormat('nl-NL').format(n); }
       function esc(s=''){ return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
       function toast(msg,type='info'){ const t=document.getElementById('toast'); const el=document.createElement('div'); el.className='toast-item'; el.textContent=msg; if(type==='error') el.style.background='#ef4444'; if(type==='success') el.style.background='#16a34a'; t.appendChild(el); setTimeout(()=>{el.style.opacity='0'},2400); setTimeout(()=>{el.remove()},3000); }
       function rid(){ return Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2); }
       function fmtDate(s){ if(!s) return '—'; const y=s.slice(0,4), m=s.slice(4,6), d=s.slice(6,8); if(y&&m&&d) return `${d}-${m}-${y}`; return s; }
 
-      // RDW fetch
       async function fetchRdw(kentekenRaw){
         const kenteken = (kentekenRaw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
         if(!kenteken){ toast('Voer een kenteken in','error'); return null; }
@@ -492,7 +495,6 @@
         }catch(e){ console.error(e); toast('Kon RDW niet bereiken','error'); return null; }
       }
 
-      // Sales drawer
       function openSales(from){
         salesDrawer.classList.add('open'); salesMask.style.display='block';
         const kent = from?.kenteken || '';
@@ -510,7 +512,6 @@
         prevDesc.textContent = salesDesc.value || '—';
         prevKenteken.textContent = kent || '—';
 
-        // Embedded full info
         se_voertuigsoort.textContent = from?.voertuigsoort || '—';
         se_inrichting.textContent   = from?.inrichting || '—';
         se_brandstof.textContent    = from?.brandstof || '—';
@@ -533,46 +534,25 @@
       }
       function closeSales(){ salesDrawer.classList.remove('open'); salesMask.style.display='none'; }
 
-      // Info drawer
       function openInfo(data){
         if(!data) return;
         infoDrawer.classList.add('open'); infoMask.style.display='block';
-        F.kenteken.textContent = data.kenteken || '—';
-        F.merk.textContent = data.merk || '—';
-        F.model.textContent = data.model || '—';
-        F.voertuigsoort.textContent = data.voertuigsoort || '—';
-        F.inrichting.textContent = data.inrichting || '—';
-        F.brandstof.textContent = data.brandstof || '—';
-        F.kw.textContent = data.kw || '—';
-        F.det.textContent = fmtDate(data.det);
-        F.tenaam.textContent = fmtDate(data.tenaam);
-        F.apk.textContent = fmtDate(data.apk);
-        F.kleur1.textContent = data.kleur1 || '—';
-        F.kleur2.textContent = data.kleur2 || '—';
-        F.bpm.textContent = data.bpm || '—';
-        F.brandstof2.textContent = data.brandstof || '—';
-        F.kw2.textContent = data.kw || '—';
-        F.cil.textContent = data.cil || '—';
-        F.cc.textContent = data.cc || '—';
-        F.emissie.textContent = data.emissie || '—';
-        F.co2.textContent = data.co2 || '—';
-        F.zit.textContent = data.zitplaatsen || '—';
-        F.deuren.textContent = data.deuren || '—';
-        F.wielen.textContent = data.wielen || '—';
-        F.massa_rijk.textContent = data.massa_rijklaar || '—';
-        F.massa_ledig.textContent = data.massa_ledig || '—';
-        F.massa_toeg.textContent = data.massa_toegestaan || '—';
-        F.trek_ong.textContent = data.trek_ong || '—';
-        F.trek_gr.textContent = data.trek_gr || '—';
-        F.handels.textContent = data.model || '—';
-        F.merk2.textContent = data.merk || '—';
-        F.bouwjaar.textContent = data.bouwjaar || '—';
-        F.catalogus.textContent = data.catalogusprijs || '—';
+        const Fm = (el,val)=> el.textContent = val || '—';
+        Fm(F.kenteken, data.kenteken); Fm(F.merk, data.merk); Fm(F.model, data.model);
+        Fm(F.voertuigsoort, data.voertuigsoort); Fm(F.inrichting, data.inrichting);
+        Fm(F.brandstof, data.brandstof); Fm(F.kw, data.kw);
+        Fm(F.det, fmtDate(data.det)); Fm(F.tenaam, fmtDate(data.tenaam)); Fm(F.apk, fmtDate(data.apk));
+        Fm(F.kleur1, data.kleur1); Fm(F.kleur2, data.kleur2); Fm(F.bpm, data.bpm);
+        Fm(F.brandstof2, data.brandstof); Fm(F.kw2, data.kw);
+        Fm(F.cil, data.cil); Fm(F.cc, data.cc); Fm(F.emissie, data.emissie); Fm(F.co2, data.co2);
+        Fm(F.zit, data.zitplaatsen); Fm(F.deuren, data.deuren); Fm(F.wielen, data.wielen);
+        Fm(F.massa_rijk, data.massa_rijklaar); Fm(F.massa_ledig, data.massa_ledig); Fm(F.massa_toeg, data.massa_toegestaan);
+        Fm(F.trek_ong, data.trek_ong); Fm(F.trek_gr, data.trek_gr);
+        Fm(F.handels, data.model); Fm(F.merk2, data.merk); Fm(F.bouwjaar, data.bouwjaar); Fm(F.catalogus, data.catalogusprijs);
         linkVehicleDetail.href = `./vehicle-detail.html?kenteken=${encodeURIComponent(data.kenteken||'')}`;
       }
       function closeInfo(){ infoDrawer.classList.remove('open'); infoMask.style.display='none'; }
 
-      // Wiring
       function wire(){
         renderList(demoVehicles);
 
@@ -642,7 +622,6 @@
           openInfo(lastFetch);
         });
 
-        // Photo handlers
         salesPhoto?.addEventListener('change', (e)=>{
           const f = e.target.files?.[0]; if(!f) return;
           const url = URL.createObjectURL(f);
@@ -652,7 +631,6 @@
           e.preventDefault(); salesPhoto.value=''; salesPhotoPreview.src='https://placehold.co/800x500?text=Foto';
         });
 
-        // Close handlers
         btnCloseSales.addEventListener('click', closeSales);
         salesMask.addEventListener('click', closeSales);
         btnSave.addEventListener('click', ()=>{ toast('Opgeslagen (demo — niet persistent)','success'); closeSales(); });
@@ -670,7 +648,6 @@
           });
         }
 
-        // live preview sync
         [salesTitle, salesPrice, salesVat, salesDesc].forEach(el=>el.addEventListener('input', ()=>{
           prevTitle.textContent = salesTitle.value || '—';
           prevPrice.textContent = salesPrice.value ? `€${fmtPrice(+salesPrice.value)}` : '—';
@@ -680,7 +657,6 @@
       }
 
       function rid(){ return Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2); }
-
       wire();
     </script>
   </body>
