@@ -71,6 +71,16 @@
       @media(min-width:1024px){ .grid-cars{grid-template-columns:repeat(3,minmax(0,1fr));} }
       .car-img{aspect-ratio:4/3;object-fit:cover;width:100%;border-radius:.8rem;border:1px solid #e5e7eb;background:#f6f7f9}
       .spec-pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;border:1px solid #e5e7eb;border-radius:999px;padding:.25rem .5rem;white-space:nowrap}
+
+      /* ✅ Fix: on small screens, make the sidebar non-sticky and auto height */
+      @media (max-width:640px){
+        #sidebar{
+          position:static !important;
+          top:auto !important;
+          height:auto !important;
+          overflow:visible !important;
+        }
+      }
     </style>
   </head>
 
@@ -97,7 +107,7 @@
 
       <main class="grid grid-cols-1 xl:grid-cols-[280px,1fr] gap-4 p-3 sm:p-4 items-start">
         <!-- STICKY SIDEBAR -->
-        <aside class="card p-3 sm:p-4 space-y-4 max-sm:border-slate-100 sticky top-3 self-start h-[calc(100vh-1.5rem)] overflow-auto">
+        <aside id="sidebar" class="card p-3 sm:p-4 space-y-4 max-sm:border-slate-100 sticky top-3 self-start h-[calc(100vh-1.5rem)] overflow-auto">
           <div class="pill flex items-center gap-2 w-fit"><i class="fa-regular fa-circle-check text-green-600"></i>Ingelogd niet vereist</div>
           <div class="grid gap-2">
             <a class="btn" href="#"><i class="fa-solid fa-gauge"></i>Dashboard</a>
