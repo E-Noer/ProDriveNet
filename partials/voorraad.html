@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Voorraad — Overzicht</title>
+  <title>Voorraad — Partial</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer"/>
@@ -21,41 +21,26 @@
     .spec-pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;border:1px solid #e5e7eb;border-radius:999px;padding:.25rem .5rem;white-space:nowrap}
   </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900">
-  <header class="px-3 sm:px-4 py-3">
-    <div class="max-w-6xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <a href="./platform.html#voorraad-section" class="btn"><i class="fa-solid fa-arrow-left"></i> Terug</a>
-        <h1 class="text-lg sm:text-xl font-semibold">Voorraad</h1>
-        <span class="pill">Demo</span>
+<body class="bg-transparent text-slate-900">
+  <div class="card p-4">
+    <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+      <div class="flex items-center gap-2">
+        <div class="font-semibold">Voorraad</div>
+        <span id="count" class="pill">—</span>
       </div>
-      <a href="./platform.html" class="btn"><i class="fa-solid fa-gauge"></i> Platform</a>
+      <input id="q" placeholder="Zoek merk / model / kenteken…" class="px-3 py-2 border rounded-lg w-64 max-sm:w-full" />
     </div>
-  </header>
 
-  <main class="max-w-6xl mx-auto p-3 sm:p-4">
-    <div class="card p-4">
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <div class="flex items-center gap-2">
-          <div class="font-semibold">Auto’s te koop</div>
-          <span id="count" class="pill">—</span>
-        </div>
-        <div class="flex items-center gap-2 max-sm:w-full">
-          <input id="q" placeholder="Zoek merk / model / kenteken…" class="px-3 py-2 border rounded-lg w-64 max-sm:w-full" />
-        </div>
-      </div>
-
-      <div id="grid" class="grid-cars"></div>
-    </div>
-  </main>
+    <div id="grid" class="grid-cars"></div>
+  </div>
 
   <script>
+    // Demo data (all car photos)
     const cars = [
       { id:'1', kenteken:'SX348F', merk:'Ford', model:'Fiesta', bouwjaar:2020, prijs:9450, km:167812, brandstof:'Benzine', transmissie:'Handmatig', btwmarge:'Marge', img:'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1200&auto=format&fit=crop' },
       { id:'2', kenteken:'12KLF3', merk:'Volkswagen', model:'Golf', bouwjaar:2017, prijs:13450, km:72436, brandstof:'Benzine', transmissie:'Handmatig', btwmarge:'BTW', img:'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?q=80&w=1200&auto=format&fit=crop' },
       { id:'3', kenteken:'P123JK', merk:'BMW', model:'320i', bouwjaar:2019, prijs:19900, km:98006, brandstof:'Diesel', transmissie:'Automaat', btwmarge:'BTW', img:'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200&auto=format&fit=crop' },
-      /* 👇 UPDATED: Audi A3 now uses a proper car image */
-      { id:'4', kenteken:'N987TR', merk:'Audi', model:'A3', bouwjaar:2018, prijs:15950, km:81200, brandstof:'Benzine', transmissie:'Handmatig', btwmarge:'Marge', img:'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1200&auto=format&fit=crop' },
+      { id:'4', kenteken:'N987TR', merk:'Audi', model:'A3', bouwjaar:2018, prijs:15950, km:81200, brandstof:'Benzine', transmissie:'Handmatig', btwmarge:'Marge', img:'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1200&auto=format&fit=crop' }, /* fixed */
       { id:'5', kenteken:'KX777X', merk:'Peugeot', model:'208', bouwjaar:2021, prijs:17250, km:31250, brandstof:'Benzine', transmissie:'Automaat', btwmarge:'BTW', img:'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=1200&auto=format&fit=crop' },
       { id:'6', kenteken:'TT445G', merk:'Renault', model:'Clio', bouwjaar:2019, prijs:11250, km:65450, brandstof:'Benzine', transmissie:'Handmatig', btwmarge:'BTW', img:'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?q=80&w=1200&auto=format&fit=crop' },
     ];
@@ -64,7 +49,7 @@
     const count = document.getElementById('count');
     const q = document.getElementById('q');
 
-    function fmt(n){ return new Intl.NumberFormat('nl-NL').format(n); }
+    const fmt = n => new Intl.NumberFormat('nl-NL').format(n);
 
     function card(c){
       const el = document.createElement('article');
@@ -78,7 +63,7 @@
           </div>
           <div class="text-right">
             <div class="font-semibold">€${fmt(c.prijs)}</div>
-            <a class="text-sm underline" href="./vehicle-detail.html?kenteken=${encodeURIComponent(c.kenteken)}">Details</a>
+            <a class="text-sm underline" href="../vehicle-detail.html?kenteken=${encodeURIComponent(c.kenteken)}">Details</a>
           </div>
         </div>
         <div class="mt-3 flex flex-wrap gap-2">
@@ -90,7 +75,7 @@
         </div>
         <div class="mt-3 flex items-center justify-between">
           <div class="text-sm">Vanaf <span class="font-semibold">€ ${fmt(Math.round((c.prijs*0.024+9)*100)/100)} p/m</span></div>
-          <a class="btn btn-primary" href="./vehicle-detail.html?kenteken=${encodeURIComponent(c.kenteken)}"><i class="fa-regular fa-eye"></i> Bekijk deal</a>
+          <a class="btn btn-primary" href="../vehicle-detail.html?kenteken=${encodeURIComponent(c.kenteken)}"><i class="fa-regular fa-eye"></i> Bekijk deal</a>
         </div>
       `;
       return el;
@@ -100,10 +85,14 @@
       grid.innerHTML = '';
       list.forEach(c => grid.appendChild(card(c)));
       count.textContent = list.length + ' auto' + (list.length===1?'':'’s');
+      // tell parent our new height (so the iframe grows with content)
+      requestAnimationFrame(() => {
+        parent?.postMessage({type:'voorraad-size', height: document.body.scrollHeight }, '*');
+      });
     }
 
+    // initial render + search
     render(cars);
-
     q.addEventListener('input', (e)=>{
       const s = e.target.value.trim().toLowerCase();
       const f = cars.filter(c =>
@@ -113,6 +102,10 @@
       );
       render(f);
     });
+
+    // notify parent on resize too
+    const ro = new ResizeObserver(()=> parent?.postMessage({type:'voorraad-size', height: document.body.scrollHeight }, '*'));
+    ro.observe(document.body);
   </script>
 </body>
 </html>

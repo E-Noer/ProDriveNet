@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Voorraad — Overzicht</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer"/>
+  <style>
+    html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    :root{ --panel:#ffffff; }
+    .card{background:var(--panel);border:1px solid #e5e7eb;border-radius:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.75rem;padding:.55rem .9rem;border:1px solid #e5e7eb;background:#fff}
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <header class="px-3 sm:px-4 py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="./platform.html#voorraad" class="btn"><i class="fa-solid fa-arrow-left"></i> Terug</a>
+        <h1 class="text-lg sm:text-xl font-semibold">Voorraad</h1>
+        <span class="border rounded-full px-2 py-1 text-sm">Demo</span>
+      </div>
+      <a href="./platform.html" class="btn"><i class="fa-solid fa-gauge"></i> Platform</a>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-3 sm:p-4">
+    <div class="card p-4">
+      <iframe id="voorraadFrame" src="./partials/voorraad.html"
+              style="width:100%; border:0; display:block; min-height:900px;"></iframe>
+    </div>
+  </main>
+
+  <script>
+    const vf = document.getElementById('voorraadFrame');
+    window.addEventListener('message', (e)=>{
+      const d = e?.data || {};
+      if(d.type === 'voorraad-size' && typeof d.height === 'number'){
+        vf.style.height = Math.max(700, d.height + 16) + 'px';
+      }
+    }, false);
+  </script>
+</body>
+</html>
