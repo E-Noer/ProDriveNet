@@ -22,6 +22,7 @@
       .btn:hover{background:#fafafa}
       .btn-primary{background:linear-gradient(135deg,var(--brand),#4ab0ff);border-color:transparent;color:#fff}
       .btn-primary:hover{filter:brightness(.98)}
+      .btn-icon{border:1px solid #e5e7eb;background:#fff;width:36px;height:36px;display:inline-grid;place-items:center;border-radius:.6rem}
       .row{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center}
       .veh-row:hover{background:#fafafa}
       .veh-thumb{width:56px;height:42px;object-fit:cover;border-radius:.5rem;border:1px solid #e5e7eb;background:#f3f4f6}
@@ -29,12 +30,15 @@
       .toast{position:fixed;right:1rem;top:1rem;display:flex;flex-direction:column;gap:.5rem;z-index:80}
       .toast-item{background:#111;color:#fff;padding:.7rem 1rem;border-radius:.75rem;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 
-      /* Full-info drawer */
+      /* Drawers */
       .drawer-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:90}
-      .drawer{position:fixed;top:0;right:0;height:100%;width:min(980px,100%);transform:translateX(100%);transition:transform .2s ease;z-index:91}
+      .drawer{position:fixed;top:0;right:0;height:100%;width:min(1100px,100%);transform:translateX(100%);transition:transform .2s ease;z-index:91}
       .drawer.open + .drawer-mask{display:block}
       .drawer.open{transform:translateX(0)}
       .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.75rem; border:1px solid #e5e7eb; padding:.15rem .35rem; border-radius:.35rem; background:#fff}
+      .drop{border:1px dashed #d1d5db;border-radius:.75rem;display:grid;place-items:center;padding:1rem;background:#fafafa}
+      .kv{display:grid;grid-template-columns:1fr 1fr;gap:.35rem .75rem;font-size:.9rem}
+      .kv .k{color:#6b7280}
     </style>
   </head>
 
@@ -136,17 +140,19 @@
       </main>
     </div>
 
-    <!-- Sales Drawer (unchanged from previous demo: keep modal simple) -->
+    <!-- SALES DRAWER (with Photo upload + Embedded Full Info) -->
     <div id="salesDrawer" class="drawer card p-0 overflow-auto">
       <div class="px-4 py-3 border-b flex items-center justify-between sticky top-0 bg-white">
         <div class="font-semibold">Verkoop instellen</div>
         <button id="btnCloseSales" class="btn"><i class="fa-solid fa-xmark"></i>Sluiten</button>
       </div>
+
       <div class="p-4 grid xl:grid-cols-2 gap-4">
+        <!-- LEFT: verkoopvelden -->
         <section class="card p-4">
           <div class="text-sm text-gray-500 mb-2">Verkoop</div>
           <div class="grid gap-3">
-            <label class="grid gap-1"><span class="text-sm text-gray-500">Titel</span><input id="salesTitle" class="ring-focus px-3 py-2 border rounded-lg" placeholder="Bijv. Ford Kuga 1.5 EcoBoost Titanium"/></label>
+            <label class="grid gap-1"><span class="text-sm text-gray-500">Titel</span><input id="salesTitle" class="ring-focus px-3 py-2 border rounded-lg" placeholder="Bijv. Volvo XC40 B4" /></label>
             <div class="grid grid-cols-2 gap-3">
               <label class="grid gap-1"><span class="text-sm text-gray-500">Vraagprijs (€)</span><input id="salesPrice" type="number" class="ring-focus px-3 py-2 border rounded-lg" placeholder="14950"/></label>
               <label class="grid gap-1"><span class="text-sm text-gray-500">BTW / Marge</span>
@@ -158,30 +164,77 @@
               <label class="grid gap-1"><span class="text-sm text-gray-500">Kilometerstand</span><input id="salesKm" type="number" class="ring-focus px-3 py-2 border rounded-lg" placeholder="123456"/></label>
               <label class="grid gap-1"><span class="text-sm text-gray-500">Bouwjaar</span><input id="salesYear" type="number" class="ring-focus px-3 py-2 border rounded-lg" placeholder="2019"/></label>
             </div>
+
+            <!-- Photo upload -->
+            <div class="grid gap-2">
+              <span class="text-sm text-gray-500">Foto</span>
+              <div id="drop" class="drop">
+                <div class="text-center text-sm text-gray-500">
+                  <div class="mb-2"><img id="prevImg" class="max-w-full max-h-48 rounded-lg border" src="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?q=80&w=1200&auto=format&fit=crop" alt="Preview"></div>
+                  <div class="flex items-center justify-center gap-2">
+                    <label class="btn">
+                      <i class="fa-solid fa-image"></i> Kies afbeelding
+                      <input id="salesPhoto" type="file" accept="image/*" class="hidden" />
+                    </label>
+                    <button id="btnClearPhoto" class="btn btn-icon" title="Verwijder foto"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="flex items-center justify-between">
               <div class="text-sm">Status: <span class="pill">Gepubliceerd</span></div>
               <button id="btnSave" class="btn btn-primary"><i class="fa-regular fa-floppy-disk"></i>Opslaan (demo)</button>
             </div>
           </div>
         </section>
-        <section class="card p-4">
-          <div class="text-sm text-gray-500 mb-2">Voorbeeld</div>
-          <div class="grid gap-3">
-            <img id="prevImg" class="w-full h-56 object-cover rounded-lg border" src="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?q=80&w=1200&auto=format&fit=crop" alt="Preview">
-            <div class="grid grid-cols-2 gap-3 text-sm">
-              <div><span class="text-gray-500">Titel:</span> <span id="prevTitle" class="font-medium">—</span></div>
-              <div><span class="text-gray-500">Prijs:</span> <span id="prevPrice" class="font-medium">—</span></div>
-              <div><span class="text-gray-500">Kenteken:</span> <span id="prevKenteken" class="font-medium">—</span></div>
-              <div><span class="text-gray-500">BTW:</span> <span id="prevVat" class="font-medium">—</span></div>
+
+        <!-- RIGHT: preview + FULL INFO (embedded) -->
+        <section class="grid gap-4">
+          <div class="card p-4">
+            <div class="text-sm text-gray-500 mb-2">Voorbeeld</div>
+            <div class="grid gap-3">
+              <div class="grid grid-cols-2 gap-3 text-sm">
+                <div><span class="text-gray-500">Titel:</span> <span id="prevTitle" class="font-medium">—</span></div>
+                <div><span class="text-gray-500">Prijs:</span> <span id="prevPrice" class="font-medium">—</span></div>
+                <div><span class="text-gray-500">Kenteken:</span> <span id="prevKenteken" class="font-medium">—</span></div>
+                <div><span class="text-gray-500">BTW:</span> <span id="prevVat" class="font-medium">—</span></div>
+              </div>
+              <div class="text-sm"><span class="text-gray-500">Beschrijving:</span> <span id="prevDesc" class="font-medium">—</span></div>
             </div>
-            <div class="text-sm"><span class="text-gray-500">Beschrijving:</span> <span id="prevDesc" class="font-medium">—</span></div>
+          </div>
+
+          <!-- Embedded full info (same data as the separate drawer) -->
+          <div class="card p-4">
+            <div class="text-sm text-gray-500 mb-2">Volledige voertuiginfo</div>
+            <div class="kv">
+              <div class="k">Voertuigsoort</div><div id="se_voertuigsoort">—</div>
+              <div class="k">Inrichting</div><div id="se_inrichting">—</div>
+              <div class="k">Brandstof</div><div id="se_brandstof">—</div>
+              <div class="k">Vermogen (kW)</div><div id="se_kw">—</div>
+              <div class="k">Datum 1e toelating</div><div id="se_det">—</div>
+              <div class="k">APK t/m</div><div id="se_apk">—</div>
+              <div class="k">Zitplaatsen</div><div id="se_zitplaatsen">—</div>
+              <div class="k">Massa rijklaar</div><div id="se_massa_rijklaar">—</div>
+              <div class="k">Max massa voertuig</div><div id="se_massa_toeg">—</div>
+              <div class="k">Trekken ongeremd</div><div id="se_trek_ong">—</div>
+              <div class="k">Trekken geremd</div><div id="se_trek_gr">—</div>
+              <div class="k">Cilinders</div><div id="se_cil">—</div>
+              <div class="k">Cilinderinhoud (cc)</div><div id="se_cc">—</div>
+              <div class="k">Emissiecode</div><div id="se_emissie">—</div>
+              <div class="k">CO₂ (g/km)</div><div id="se_co2">—</div>
+              <div class="k">Kleur</div><div id="se_kleur1">—</div>
+              <div class="k">2e kleur</div><div id="se_kleur2">—</div>
+              <div class="k">BPM (bruto)</div><div id="se_bpm">—</div>
+              <div class="k">Catalogusprijs</div><div id="se_catalogus">—</div>
+            </div>
           </div>
         </section>
       </div>
     </div>
     <div id="salesMask" class="drawer-mask"></div>
 
-    <!-- Full Vehicle Info Drawer -->
+    <!-- Full Vehicle Info Drawer (unchanged) -->
     <div id="infoDrawer" class="drawer card p-0 overflow-auto">
       <div class="px-4 py-3 border-b flex items-center justify-between sticky top-0 bg-white">
         <div class="font-semibold">Volledige voertuiginfo</div>
@@ -192,7 +245,6 @@
       </div>
 
       <div class="p-4 space-y-4">
-        <!-- Header strip -->
         <div class="card p-4">
           <div class="flex items-center gap-3 flex-wrap">
             <div class="text-lg font-semibold"><span id="fi_merk">—</span> <span id="fi_model">—</span></div>
@@ -201,54 +253,53 @@
           </div>
         </div>
 
-        <!-- Sections -->
         <div class="grid lg:grid-cols-2 gap-4">
           <section class="card p-4">
             <div class="text-sm text-gray-500 mb-2">Registratie</div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <div class="text-gray-500">Voertuigsoort</div><div id="fi_voertuigsoort" class="font-medium">—</div>
-              <div class="text-gray-500">Datum 1e toelating</div><div id="fi_det" class="font-medium">—</div>
-              <div class="text-gray-500">Datum tenaamstelling</div><div id="fi_tenaam" class="font-medium">—</div>
-              <div class="text-gray-500">APK geldig t/m</div><div id="fi_apk" class="font-medium">—</div>
-              <div class="text-gray-500">Kleur</div><div id="fi_kleur1" class="font-medium">—</div>
-              <div class="text-gray-500">2e kleur</div><div id="fi_kleur2" class="font-medium">—</div>
-              <div class="text-gray-500">BPM (bruto)</div><div id="fi_bpm" class="font-medium">—</div>
+            <div class="kv">
+              <div class="k">Voertuigsoort</div><div id="fi_voertuigsoort">—</div>
+              <div class="k">Datum 1e toelating</div><div id="fi_det">—</div>
+              <div class="k">Datum tenaamstelling</div><div id="fi_tenaam">—</div>
+              <div class="k">APK geldig t/m</div><div id="fi_apk">—</div>
+              <div class="k">Kleur</div><div id="fi_kleur1">—</div>
+              <div class="k">2e kleur</div><div id="fi_kleur2">—</div>
+              <div class="k">BPM (bruto)</div><div id="fi_bpm">—</div>
             </div>
           </section>
 
           <section class="card p-4">
             <div class="text-sm text-gray-500 mb-2">Motor & Brandstof</div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <div class="text-gray-500">Brandstof</div><div id="fi_brandstof2" class="font-medium">—</div>
-              <div class="text-gray-500">Netto max. vermogen (kW)</div><div id="fi_kw2" class="font-medium">—</div>
-              <div class="text-gray-500">Aantal cilinders</div><div id="fi_cil" class="font-medium">—</div>
-              <div class="text-gray-500">Cilinderinhoud (cc)</div><div id="fi_cc" class="font-medium">—</div>
-              <div class="text-gray-500">Emissiecode</div><div id="fi_emissie" class="font-medium">—</div>
-              <div class="text-gray-500">CO₂ (g/km)</div><div id="fi_co2" class="font-medium">—</div>
+            <div class="kv">
+              <div class="k">Brandstof</div><div id="fi_brandstof2">—</div>
+              <div class="k">Netto max. vermogen (kW)</div><div id="fi_kw2">—</div>
+              <div class="k">Aantal cilinders</div><div id="fi_cil">—</div>
+              <div class="k">Cilinderinhoud (cc)</div><div id="fi_cc">—</div>
+              <div class="k">Emissiecode</div><div id="fi_emissie">—</div>
+              <div class="k">CO₂ (g/km)</div><div id="fi_co2">—</div>
             </div>
           </section>
 
           <section class="card p-4">
             <div class="text-sm text-gray-500 mb-2">Afmetingen & Massa</div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <div class="text-gray-500">Zitplaatsen</div><div id="fi_zit" class="font-medium">—</div>
-              <div class="text-gray-500">Deuren</div><div id="fi_deuren" class="font-medium">—</div>
-              <div class="text-gray-500">Wielen</div><div id="fi_wielen" class="font-medium">—</div>
-              <div class="text-gray-500">Massa rijklaar (kg)</div><div id="fi_massa_rijk" class="font-medium">—</div>
-              <div class="text-gray-500">Massa ledig (kg)</div><div id="fi_massa_ledig" class="font-medium">—</div>
-              <div class="text-gray-500">Max massa voertuig (kg)</div><div id="fi_massa_toeg" class="font-medium">—</div>
-              <div class="text-gray-500">Max trekken ongeremd (kg)</div><div id="fi_trek_ong" class="font-medium">—</div>
-              <div class="text-gray-500">Max trekken geremd (kg)</div><div id="fi_trek_gr" class="font-medium">—</div>
+            <div class="kv">
+              <div class="k">Zitplaatsen</div><div id="fi_zit">—</div>
+              <div class="k">Deuren</div><div id="fi_deuren">—</div>
+              <div class="k">Wielen</div><div id="fi_wielen">—</div>
+              <div class="k">Massa rijklaar (kg)</div><div id="fi_massa_rijk">—</div>
+              <div class="k">Massa ledig (kg)</div><div id="fi_massa_ledig">—</div>
+              <div class="k">Max massa voertuig (kg)</div><div id="fi_massa_toeg">—</div>
+              <div class="k">Max trekken ongeremd (kg)</div><div id="fi_trek_ong">—</div>
+              <div class="k">Max trekken geremd (kg)</div><div id="fi_trek_gr">—</div>
             </div>
           </section>
 
           <section class="card p-4">
             <div class="text-sm text-gray-500 mb-2">Administratief</div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <div class="text-gray-500">Handelsbenaming</div><div id="fi_handels" class="font-medium">—</div>
-              <div class="text-gray-500">Merk</div><div id="fi_merk2" class="font-medium">—</div>
-              <div class="text-gray-500">Bouwjaar</div><div id="fi_bouwjaar" class="font-medium">—</div>
-              <div class="text-gray-500">Catalogusprijs</div><div id="fi_catalogus" class="font-medium">—</div>
+            <div class="kv">
+              <div class="k">Handelsbenaming</div><div id="fi_handels">—</div>
+              <div class="k">Merk</div><div id="fi_merk2">—</div>
+              <div class="k">Bouwjaar</div><div id="fi_bouwjaar">—</div>
+              <div class="k">Catalogusprijs</div><div id="fi_catalogus">—</div>
             </div>
           </section>
         </div>
@@ -289,6 +340,7 @@
       const s_zit = document.getElementById('s_zit');
       const s_massa = document.getElementById('s_massa');
 
+      // Sales drawer
       const salesDrawer = document.getElementById('salesDrawer');
       const salesMask = document.getElementById('salesMask');
       const btnCloseSales = document.getElementById('btnCloseSales');
@@ -304,13 +356,27 @@
       const prevVat = document.getElementById('prevVat');
       const prevDesc = document.getElementById('prevDesc');
       const prevKenteken = document.getElementById('prevKenteken');
+      const salesPhoto = document.getElementById('salesPhoto');
+      const btnClearPhoto = document.getElementById('btnClearPhoto');
+      const prevImg = document.getElementById('prevImg');
 
+      // Embedded full info fields
+      const SE = id => document.getElementById(id);
+      const E = {
+        voertuigsoort: SE('se_voertuigsoort'), inrichting: SE('se_inrichting'), brandstof: SE('se_brandstof'),
+        kw: SE('se_kw'), det: SE('se_det'), apk: SE('se_apk'), zitplaatsen: SE('se_zitplaatsen'),
+        massa_rijklaar: SE('se_massa_rijklaar'), massa_toeg: SE('se_massa_toeg'),
+        trek_ong: SE('se_trek_ong'), trek_gr: SE('se_trek_gr'),
+        cil: SE('se_cil'), cc: SE('se_cc'), emissie: SE('se_emissie'), co2: SE('se_co2'),
+        kleur1: SE('se_kleur1'), kleur2: SE('se_kleur2'), bpm: SE('se_bpm'), catalogus: SE('se_catalogus'),
+      };
+
+      // Info drawer fields
       const infoDrawer = document.getElementById('infoDrawer');
       const infoMask = document.getElementById('infoMask');
       const btnCloseInfo = document.getElementById('btnCloseInfo');
       const linkVehicleDetail = document.getElementById('linkVehicleDetail');
 
-      // Full info fields
       const fi = id => document.getElementById(id);
       const F = {
         kenteken: fi('fi_kenteken'), merk: fi('fi_merk'), model: fi('fi_model'),
@@ -327,7 +393,7 @@
         handels: fi('fi_handels'), merk2: fi('fi_merk2'), bouwjaar: fi('fi_bouwjaar'), catalogus: fi('fi_catalogus')
       };
 
-      let lastFetch = null; // holds last RDW result
+      let lastFetch = null;
 
       // --- Render list ---
       function renderList(items){
@@ -360,6 +426,7 @@
       function esc(s=''){ return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
       function toast(msg,type='info'){ const t=document.getElementById('toast'); const el=document.createElement('div'); el.className='toast-item'; el.textContent=msg; if(type==='error') el.style.background='#ef4444'; if(type==='success') el.style.background='#16a34a'; t.appendChild(el); setTimeout(()=>{el.style.opacity='0'},2400); setTimeout(()=>{el.remove()},3000); }
       function rid(){ return Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2); }
+      function fmtDate(s){ if(!s) return '—'; const y=s.slice(0,4), m=s.slice(4,6), d=s.slice(6,8); if(y&&m&&d) return `${d}-${m}-${y}`; return s; }
 
       // --- RDW fetch ---
       async function fetchRdw(kentekenRaw){
@@ -407,7 +474,7 @@
         }catch(e){ console.error(e); toast('Kon RDW niet bereiken','error'); return null; }
       }
 
-      // --- Sales drawer ---
+      // --- Sales drawer open/close + populate ---
       function openSales(from){
         salesDrawer.classList.add('open'); salesMask.style.display='block';
         const kent = from?.kenteken || '';
@@ -422,10 +489,31 @@
         prevVat.textContent = salesVat.value;
         prevDesc.textContent = salesDesc.value || '—';
         prevKenteken.textContent = kent || '—';
+
+        // Fill embedded full info (E.*)
+        E.voertuigsoort.textContent = from?.voertuigsoort || '—';
+        E.inrichting.textContent   = from?.inrichting || '—';
+        E.brandstof.textContent    = from?.brandstof || '—';
+        E.kw.textContent           = from?.kw || '—';
+        E.det.textContent          = fmtDate(from?.det);
+        E.apk.textContent          = fmtDate(from?.apk);
+        E.zitplaatsen.textContent  = from?.zitplaatsen || '—';
+        E.massa_rijklaar.textContent = from?.massa_rijklaar || '—';
+        E.massa_toeg.textContent   = from?.massa_toegestaan || '—';
+        E.trek_ong.textContent     = from?.trek_ong || '—';
+        E.trek_gr.textContent      = from?.trek_gr || '—';
+        E.cil.textContent          = from?.cil || '—';
+        E.cc.textContent           = from?.cc || '—';
+        E.emissie.textContent      = from?.emissie || '—';
+        E.co2.textContent          = from?.co2 || '—';
+        E.kleur1.textContent       = from?.kleur1 || from?.kleur || '—';
+        E.kleur2.textContent       = from?.kleur2 || '—';
+        E.bpm.textContent          = from?.bpm || '—';
+        E.catalogus.textContent    = from?.catalogusprijs || '—';
       }
       function closeSales(){ salesDrawer.classList.remove('open'); salesMask.style.display='none'; }
 
-      // --- Full info drawer ---
+      // --- Full info drawer (separate) ---
       function openInfo(data){
         if(!data) return;
         infoDrawer.classList.add('open'); infoMask.style.display='block';
@@ -469,7 +557,6 @@
         linkVehicleDetail.href = `./vehicle-detail.html?kenteken=${encodeURIComponent(data.kenteken||'')}`;
       }
       function closeInfo(){ infoDrawer.classList.remove('open'); infoMask.style.display='none'; }
-      function fmtDate(s){ if(!s) return '—'; const y=s.slice(0,4), m=s.slice(4,6), d=s.slice(6,8); if(y&&m&&d) return `${d}-${m}-${y}`; return s; }
 
       // --- Wiring ---
       function wire(){
@@ -537,6 +624,19 @@
         document.getElementById('btnFullInfo').addEventListener('click', ()=>{
           if(!lastFetch){ toast('Eerst RDW-gegevens of demo vullen','error'); return; }
           openInfo(lastFetch);
+        });
+
+        // Photo upload handlers
+        salesPhoto.addEventListener('change', async (e)=>{
+          const file = e.target.files?.[0];
+          if(!file) return;
+          const url = URL.createObjectURL(file);
+          prevImg.src = url;
+        });
+        btnClearPhoto.addEventListener('click', (e)=>{
+          e.preventDefault();
+          salesPhoto.value = '';
+          prevImg.src = 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?q=80&w=1200&auto=format&fit=crop';
         });
 
         btnCloseSales.addEventListener('click', closeSales);
