@@ -20,9 +20,9 @@
       .card{background:var(--panel);border:1px solid #e5e7eb;border-radius:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04)}
       .pill{border:1px solid #e5e7eb;border-radius:999px;padding:.35rem .6rem;font-size:.8rem}
       .ring-focus:focus{outline:none;box-shadow:var(--ring)}
-      /* Ensure controls are >=16px to avoid iOS page zoom on focus */
+      /* Ensure controls are >=16px to avoid iOS zoom on focus */
       input, select, textarea, button{ font-size:16px; }
-      .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.75rem;padding:.55rem .9rem;border:1px solid #e5e7eb;background:#fff;line-height:1.1}
+      .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.75rem;padding:.55rem .9rem;border:1px solid #e5e7eb;background:#fff;line-height:1.1;white-space:nowrap}
       .btn:hover{background:#fafafa}
       .btn-primary{background:linear-gradient(135deg,var(--brand),#4ab0ff);border-color:transparent;color:#fff}
       .btn-primary:hover{filter:brightness(.98)}
@@ -44,13 +44,21 @@
       .kv{display:grid;grid-template-columns:max(140px) 1fr;gap:.35rem .8rem;font-size:.9rem}
       .kv .k{color:#6b7280}
 
-      /* Titles scale with viewport: keeps hierarchy but avoids overflow on phone */
+      /* Titles scale with viewport */
       .title-lg{font-weight:700;letter-spacing:-0.01em;font-size:clamp(1.125rem, 1.2vw + .9rem, 1.25rem);} /* Drawer header */
       .section-title{font-size:clamp(1rem, .8vw + .8rem, 1.125rem);font-weight:600;}
+
+      /* Utility: hide scrollbars for overflow-x toolbars on iOS/Android */
+      .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+      .no-scrollbar::-webkit-scrollbar{display:none}
 
       /* --- Mobile refinements --- */
       @media (max-width:640px){
         body{padding-bottom:env(safe-area-inset-bottom);}
+        header .brand-title{font-size:1rem; line-height:1.15;}
+        header .btn{padding:.45rem .6rem}
+        .btn{padding:.5rem .7rem}
+        .pill{padding:.28rem .5rem}
         .card{border-color:#eef2f7;}
         header.card, .card.p-4{padding:0.75rem;}
         .drawer{height:100dvh;}
@@ -64,16 +72,18 @@
 
     <div class="grid grid-rows-[auto,1fr] min-h-screen">
       <header class="card px-3 py-2 sm:px-4 sm:py-3">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <!-- Brand -->
           <div class="flex items-center gap-3">
             <div class="pill bg-black text-white font-bold"><i class="fa-solid fa-bolt"></i>&nbsp;LIVE DEMO</div>
-            <h1 class="font-bold text-lg">E-Noer Auto Platform</h1>
+            <h1 class="brand-title font-bold text-base sm:text-lg">E-Noer Auto Platform</h1>
             <span class="hidden sm:inline text-sm text-gray-500">/ Demo zonder login</span>
           </div>
-          <div class="flex items-center gap-2">
-            <button id="btnQuickCreate" class="btn"><i class="fa-regular fa-square-plus"></i>Snel aanmaken</button>
-            <a class="btn" href="./sales-overview.html"><i class="fa-solid fa-table-list"></i>Verkoopoverzicht</a>
-            <a class="btn" href="./vehicle-detail.html"><i class="fa-solid fa-car"></i>Detail</a>
+          <!-- Actions: wrap on small, allow horizontal scroll if tight -->
+          <div class="flex items-center gap-2 max-sm:w-full max-sm:overflow-x-auto no-scrollbar">
+            <button id="btnQuickCreate" class="btn"><i class="fa-regular fa-square-plus"></i><span class="hidden xs:inline">Snel aanmaken</span><span class="inline xs:hidden">Nieuw</span></button>
+            <a class="btn" href="./sales-overview.html"><i class="fa-solid fa-table-list"></i><span class="hidden xs:inline">Verkoopoverzicht</span><span class="inline xs:hidden">Overzicht</span></a>
+            <a class="btn" href="./vehicle-detail.html"><i class="fa-solid fa-car"></i><span class="hidden xs:inline">Detail</span></a>
           </div>
         </div>
       </header>
