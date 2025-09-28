@@ -64,6 +64,13 @@
         .drawer{height:100dvh;}
         .drawer [data-scroll]{max-height:calc(100dvh - 56px);overflow:auto;-webkit-overflow-scrolling:touch;}
       }
+
+      /* --- Voorraad grid styles (additive) --- */
+      .grid-cars{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:14px}
+      @media(min-width:768px){ .grid-cars{grid-template-columns:repeat(2,minmax(0,1fr));} }
+      @media(min-width:1024px){ .grid-cars{grid-template-columns:repeat(3,minmax(0,1fr));} }
+      .car-img{aspect-ratio:4/3;object-fit:cover;width:100%;border-radius:.8rem;border:1px solid #e5e7eb;background:#f6f7f9}
+      .spec-pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;border:1px solid #e5e7eb;border-radius:999px;padding:.25rem .5rem;white-space:nowrap}
     </style>
   </head>
 
@@ -94,8 +101,8 @@
           <div class="grid gap-2">
             <a class="btn" href="#"><i class="fa-solid fa-gauge"></i>Dashboard</a>
             <a class="btn btn-primary" href="#"><i class="fa-solid fa-car"></i>Voertuigen</a>
-            <!-- CHANGED: label + link -->
-            <a class="btn" href="./partials/voorraad.html"><i class="fa-solid fa-images"></i>Voorraad</a>
+            <!-- Voorraad now scrolls to the embedded section -->
+            <a class="btn" href="#voorraad-section"><i class="fa-solid fa-images"></i>Voorraad</a>
             <a class="btn" href="#"><i class="fa-solid fa-user"></i>Leads</a>
             <a class="btn" href="#"><i class="fa-solid fa-gear"></i>Instellingen</a>
           </div>
@@ -103,6 +110,7 @@
         </aside>
 
         <section class="space-y-4">
+          <!-- Existing vehicles & RDW UI stays as-is -->
           <div class="card p-3 sm:p-4 max-sm:border-slate-100">
             <div class="flex items-center justify-between gap-3 flex-wrap">
               <div class="flex items-center gap-3">
@@ -164,6 +172,19 @@
             <div class="px-2 py-2 text-sm text-gray-500">Huidige voertuigen (demo)</div>
             <div id="vehicleList" class="divide-y"></div>
           </div>
+
+          <!-- ===== Voorraad (embedded) ===== -->
+          <div id="voorraad-section" class="card p-4">
+            <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+              <div class="flex items-center gap-2">
+                <div class="font-semibold section-title">Voorraad</div>
+                <span id="vz_count" class="pill">—</span>
+              </div>
+              <input id="vz_q" placeholder="Zoek merk / model / kenteken…" class="ring-focus px-3 py-2 border rounded-lg w-64 max-sm:w-full" />
+            </div>
+            <div id="vz_grid" class="grid-cars"></div>
+          </div>
+          <!-- ===== /Voorraad ===== -->
         </section>
       </main>
     </div>
@@ -362,9 +383,19 @@
         { id: rid(), kenteken:'SX348F', merk:'FORD', model:'FIESTA', bouwjaar:'2020', kleur:'ZWART',
           thumb:'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1200&auto=format&fit=crop', prijs:9450 },
         { id: rid(), kenteken:'12KLF3', merk:'VOLKSWAGEN', model:'GOLF', bouwjaar:'2017', kleur:'BLAUW',
-          thumb:'https://images.unsplash.com/photo-1483721310020-03333e577078?q=80&w=1200&auto=format&fit=crop', prijs:13450 },
+          thumb:'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?q=80&w=1200&auto=format&fit=crop', prijs:13450 },
         { id: rid(), kenteken:'P123JK', merk:'BMW', model:'320i', bouwjaar:'2019', kleur:'WIT',
           thumb:'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200&auto=format&fit=crop', prijs:19900 }
+      ];
+
+      /* ------- Voorraad demo data (cars only) ------- */
+      const VZ = [
+        { id:'1', kenteken:'SX348F', merk:'Ford', model:'Fiesta', bouwjaar:2020, prijs:9450, km:167812, brandstof:'Benzine', transmissie:'Handmatig', btwmarge:'Marge', img:'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1200&auto=format&fit=crop' },
+        { id:'2', kenteken:'12KLF3', merk:'Volkswagen', model:'Golf', bouwjaar:2017, prijs:13450, km:72436, brandstof:'Benzine', transmissie:'Handmatig', btwmarge:'BTW', img:'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?q=80&w=1200&auto=format&fit=crop' },
+        { id:'3', kenteken:'P123JK', merk:'BMW', model:'320i', bouwjaar:2019, prijs:19900, km:98006, brandstof:'Diesel', transmissie:'Automaat', btwmarge:'BTW', img:'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200&auto=format&fit=crop' },
+        { id:'4', kenteken:'N987TR', merk:'Audi', model:'A3', bouwjaar:2018, prijs:15950, km:81200, brandstof:'Benzine', transmissie:'Handmatig', btwmarge:'Marge', img:'https://images.unsplash.com/photo-1542365887-1f1a29a43c83?q=80&w=1200&auto=format&fit=crop' },
+        { id:'5', kenteken:'KX777X', merk:'Peugeot', model:'208', bouwjaar:2021, prijs:17250, km:31250, brandstof:'Benzine', transmissie:'Automaat', btwmarge:'BTW', img:'https://images.unsplash.com/photo-1549921296-3a6b3b2a9b18?q=80&w=1200&auto=format&fit=crop' },
+        { id:'6', kenteken:'TT445G', merk:'Renault', model:'Clio', bouwjaar:2019, prijs:11250, km:65450, brandstof:'Benzine', transmissie:'Handmatig', btwmarge:'BTW', img:'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?q=80&w=1200&auto=format&fit=crop' },
       ];
 
       const elList = document.getElementById('vehicleList');
@@ -481,6 +512,57 @@
       function toast(msg,type='info'){ const t=document.getElementById('toast'); const el=document.createElement('div'); el.className='toast-item'; el.textContent=msg; if(type==='error') el.style.background='#ef4444'; if(type==='success') el.style.background='#16a34a'; t.appendChild(el); setTimeout(()=>{el.style.opacity='0'},2400); setTimeout(()=>{el.remove()},3000); }
       function rid(){ return Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2); }
       function fmtDate(s){ if(!s) return '—'; const y=s.slice(0,4), m=s.slice(4,6), d=s.slice(6,8); if(y&&m&&d) return `${d}-${m}-${y}`; return s; }
+
+      /* ===== Voorraad grid logic (embedded) ===== */
+      const vz_grid = document.getElementById('vz_grid');
+      const vz_q = document.getElementById('vz_q');
+      const vz_count = document.getElementById('vz_count');
+      function vzFmt(n){ return new Intl.NumberFormat('nl-NL').format(n); }
+      function vzCard(c){
+        const el = document.createElement('article');
+        el.className = 'card p-3';
+        el.innerHTML = `
+          <img class="car-img" src="${c.img}" alt="${c.merk} ${c.model}" />
+          <div class="mt-3 flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="font-semibold truncate">${c.merk} ${c.model}</div>
+              <div class="text-sm text-slate-500 truncate">${c.bouwjaar} • <span class="pill">${c.kenteken}</span></div>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold">€${vzFmt(c.prijs)}</div>
+              <a class="text-sm underline" href="./vehicle-detail.html?kenteken=${encodeURIComponent(c.kenteken)}">Details</a>
+            </div>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <span class="spec-pill"><i class="fa-regular fa-gauge"></i> ${vzFmt(c.km)}km</span>
+            <span class="spec-pill"><i class="fa-solid fa-gas-pump"></i> ${c.brandstof}</span>
+            <span class="spec-pill"><i class="fa-regular fa-calendar"></i> ${c.bouwjaar}</span>
+            <span class="spec-pill"><i class="fa-solid fa-gear"></i> ${c.transmissie}</span>
+            <span class="spec-pill"><i class="fa-regular fa-file-lines"></i> ${c.btwmarge}</span>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <div class="text-sm">Vanaf <span class="font-semibold">€ ${vzFmt(Math.round((c.prijs*0.024+9)*100)/100)} p/m</span></div>
+            <a class="btn btn-primary" href="./vehicle-detail.html?kenteken=${encodeURIComponent(c.kenteken)}"><i class="fa-regular fa-eye"></i> Bekijk deal</a>
+          </div>
+        `;
+        return el;
+      }
+      function vzRender(list){
+        vz_grid.innerHTML = '';
+        list.forEach(c => vz_grid.appendChild(vzCard(c)));
+        vz_count.textContent = `${list.length} auto${list.length===1?'':'’s'}`;
+      }
+      vzRender(VZ);
+      vz_q.addEventListener('input', (e)=>{
+        const s = e.target.value.trim().toLowerCase();
+        const f = VZ.filter(c =>
+          c.merk.toLowerCase().includes(s) ||
+          c.model.toLowerCase().includes(s) ||
+          c.kenteken.toLowerCase().includes(s)
+        );
+        vzRender(f);
+      });
+      /* ===== /Voorraad logic ===== */
 
       async function fetchRdw(kentekenRaw){
         const kenteken = (kentekenRaw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
